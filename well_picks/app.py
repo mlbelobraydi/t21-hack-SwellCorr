@@ -164,7 +164,7 @@ def update_figure(surface_picks):
 # update dropdown options when new pick is created
 @app.callback(
     Output("top-selector", "options"),
-    [Input('curve_list', 'children')])
+    [Input('tops-storage', 'children')])
 def update_dropdown_options(surface_picks):
     """update the options available in the dropdown when a new top is added"""
     
