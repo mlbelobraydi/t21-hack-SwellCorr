@@ -2,7 +2,7 @@
 Repository for the Transform 2021 Hack-a-Thon Well Correlation project
 
 ## Description
-Open source manual well correlation tools are nearly non-existent. Well correlations are the basic interpretations methodology to test stratigraphic and structural hypotheses. These correlations can assist with seismic depth conversion and petrophysical zonation for more advanced interpretations, along with providing inputs for maps of structure and thickness. Without a way to provide expert well correlations on well log data, it is difficult to support other projects on SWUNG or amass enough clean and validated data for later ML processes. This project aims to fix that lack of tool.
+Open source manual well correlation tools are nearly non-existent. Well correlations are the basic interpretations methodology to test stratigraphic and structural hypotheses. [Manual Correlation Notes](https://github.com/mlbelobraydi/t21-hack-wellcorr/wiki/Manual-Well-Correlation). These correlations can assist with seismic depth conversion and petrophysical zonation for more advanced interpretations, along with providing inputs for maps of structure and thickness. Without a way to provide expert well correlations on well log data, it is difficult to support other projects on SWUNG or amass enough clean and validated data for later ML processes. This project aims to fix that lack of tool. 
 
 
 ## Goals
