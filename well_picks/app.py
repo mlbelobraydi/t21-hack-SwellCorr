@@ -164,7 +164,7 @@ def update_figure(surface_picks):
 # update dropdown options when new pick is created
 @app.callback(
     Output("top-selector", "options"),
-    [Input('curve_list', 'children')])
+    [Input('tops-storage', 'children')])
 def update_dropdown_options(surface_picks):
     """update the options available in the dropdown when a new top is added"""
     
@@ -174,16 +174,16 @@ def update_dropdown_options(surface_picks):
     return dropdown_options
     
 # update curve dropdown options when curve is selected
-"""This callback is broken and not working"""
-@app.callback( ###This should make changes when curve-selector is changed and adjust the well log track
-    Output("curve-selector", "options"),
-    [Input('well_plot', 'children')])
-def update_curvedropdown_options(curve): ##Unknown what variable this should be to get the change made
-    """redraw the plot when the data in tops-storage is updated"""
-    print(curve) ##Test to see when this is changed
-    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##Thisis the same data that is used above and is probably incorrect
-    
-    return curve_dropdown_options ###unknown what to return here to make the plot update with the new selected curve.
+#"""This callback is broken and not working"""
+#@app.callback( ###This should make changes when curve-selector is changed and adjust the well log track
+#    Output("curve-selector", "options"),
+#    [Input('well_plot', 'children')])
+#def update_curvedropdown_options(curve): ##Unknown what variable this should be to get the change made
+#    """redraw the plot when the data in tops-storage is updated"""
+#    print(curve) ##Test to see when this is changed
+#    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##Thisis the same data that is used above and is probably incorrect
+#    
+#    return curve_dropdown_options ###unknown what to return here to make the plot update with the new selected curve.
 
 # Write tops to external file
 @app.callback(
