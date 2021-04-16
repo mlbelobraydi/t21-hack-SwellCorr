@@ -85,7 +85,7 @@ app.layout = html.Div(
             html.Button('Update Striplog', id='gen-striplog-button')
 
         ]),
-        dcc.Graph(id="well_plot",
+        dcc.Graph(id="well_plot", 
                     figure=fig_well_1,
                     style={'width': '60%', 'height':'900px'},
                     animate=True), # prevents axis rescaling on graph update
@@ -148,17 +148,23 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
 # Update graph when tops storage changes
 @app.callback(
     Output("well_plot", "figure"),
-    [Input('tops-storage', 'children')])
-def update_figure(surface_picks):
-    """redraw the plot when the data in tops-storage is updated"""
-    
+    [Input('tops-storage', 'children'),
+     Input('curve-selector', 'value')]
+             )
+def update_figure(surface_picks, curve):
+    """redraw the plot when the data in tops-storage is updated"""  
     surface_picks = json.loads(surface_picks)
+    
+    curve = curve if curve is not None else curve_list[0]
+    print(curve) ##This is working to print the selected value to the console, so curve value is changing
+    print(df[curve])
     # regenerate figure with the new horizontal line
+    """this is not updating the figure for the newly selected curve"""
     fig = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
     fig.update_yaxes(autorange="reversed")
     helper.update_picks_on_plot(fig, surface_picks)
-    
-    return fig
+
+    return fig ###this does not seem to return to dcc.Graph in the app
 
 
 # update dropdown options when new pick is created
@@ -172,18 +178,6 @@ def update_dropdown_options(surface_picks):
 
     dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())]
     return dropdown_options
-    
-# update curve dropdown options when curve is selected
-#"""This callback is broken and not working"""
-#@app.callback( ###This should make changes when curve-selector is changed and adjust the well log track
-#    Output("curve-selector", "options"),
-#    [Input('well_plot', 'children')])
-#def update_curvedropdown_options(curve): ##Unknown what variable this should be to get the change made
-#    """redraw the plot when the data in tops-storage is updated"""
-#    print(curve) ##Test to see when this is changed
-#    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##Thisis the same data that is used above and is probably incorrect
-#    
-#    return curve_dropdown_options ###unknown what to return here to make the plot update with the new selected curve.
 
 # Write tops to external file
 @app.callback(
