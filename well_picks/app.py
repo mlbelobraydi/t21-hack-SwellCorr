@@ -47,12 +47,6 @@ helper.update_picks_on_plot(fig_well_1, surface_picks)
 app.layout = html.Div(
     children=[
         html.Div([
-            'Mode:',
-            dcc.RadioItems(id='mode-selector',
-                           options=[{'label': 'Well Display', 'value': 'display_mode'},
-                                    {'label': 'Tops', 'value': 'tops_mode'}],
-                                    value='display_mode'),
-
             'Edit tops:', 
             dcc.Dropdown(id='top-selector', options=dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
             
@@ -76,8 +70,7 @@ app.layout = html.Div(
         ]),
         dcc.Graph(id="well_plot", 
                     figure=fig_well_1,
-                    style={'width': '60%', 'height':'900px'},
-                    animate=False), # prevents axis rescaling on graph update
+                    style={'width': '60%', 'height':'900px'}), 
 
         html.Div([
             # hidden_div for storing tops data as json
@@ -94,16 +87,6 @@ app.layout = html.Div(
     ],
     style={'display': 'flex'}
 )
-
-@app.callback(
-    Output('well_plot', 'animate'),
-    [Input('mode-selector', 'value')])
-def set_animate(mode):
-    if mode == 'display_mode':
-        return False
-    elif mode == 'tops_mode':
-        return True
-
 
 
 # update tops data when graph is clicked or new top is added
@@ -154,15 +137,16 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
 def update_figure(surface_picks, curve):
     """redraw the plot when the data in tops-storage is updated"""  
     surface_picks = json.loads(surface_picks)
-    
-   
+       
     # regenerate figure with the new horizontal line
     """this is not updating the figure for the newly selected curve"""
     fig = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
+
+    fig.layout = {'uirevision': curve} # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
     fig.update_yaxes(autorange="reversed")
     helper.update_picks_on_plot(fig, surface_picks)
-
-    return fig ###this does not seem to return to dcc.Graph in the app
+    
+    return fig
 
 
 # update dropdown options when new pick is created
