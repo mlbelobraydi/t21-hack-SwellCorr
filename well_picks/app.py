@@ -1,4 +1,4 @@
-from welly import Well
+from welly import Well, Project
 
 import plotly.express as px
 from dash import Dash, callback_context
@@ -11,43 +11,26 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-## from well_picks import helper ##declairing folder to get helper.py loaded
 import helper
-
-"""MLB specific packages to work with MySQL database"""
-import sqlalchemy
 
 
 app = Dash(__name__)
 # Create server variable with Flask server object for use with gunicorn
 server = app.server
 
-# load well data
-#w = Well.from_las(str(Path("Data") / "Poseidon1Decim.LAS")) #original example
-"""using COGCC url to load specific log
-   wells is currently converting file to meters"""
-w = Well.from_las('http://ogccweblink.state.co.us/DownloadDocumentPDF.aspx?DocumentId=2821655')
+# # load well data
+# p = Project.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS")))
+# well_names = [w.name for w in p]
 
+w = Well.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS"))) #original example
 
 df = w.df()
 curve_list = df.columns.tolist()
 curve = curve_list[0]
 
 # sample pick data, eventually load from file or other source into dict
-#surface_picks = {"Sea Bed": 520.4, "Montara Formation": 4620, "Plover Formation (Top Volcanics)": 4703.2, "Plover Formation (Top Reservoir)": 4798.4, "Nome Formation": 5079}
-##UNITS NEED TO BE IN Meters this is converted from database
-##This needs to be more of a dynamic read
-surface_picks = {"WASATCH G": 1313.3191,
-                 "FORT UNION": 1368.4852,
-                 "MESAVERDE": 1736.0561,
-                 "WILLIAMS FORK": 1793.9653,
-                 "CAMEO": 2487.3514,
-                 "ROLLINS": 2607.1320,
-                 "CORCORAN": 2743.6757,
-                 "MANCOS": 2795.1844,
-                 "NIOBRARA": 3695.5197,
-                 "DAKOTA": 4163.3648
-                }
+surface_picks = {"Sea Bed": 520.4, "Montara Formation": 4620, "Plover Formation (Top Volcanics)": 4703.2, "Plover Formation (Top Reservoir)": 4798.4, "Nome Formation": 5079}
+
 
 
 
@@ -64,6 +47,12 @@ helper.update_picks_on_plot(fig_well_1, surface_picks)
 app.layout = html.Div(
     children=[
         html.Div([
+            'Mode:',
+            dcc.RadioItems(id='mode-selector',
+                           options=[{'label': 'Well Display', 'value': 'display_mode'},
+                                    {'label': 'Tops', 'value': 'tops_mode'}],
+                                    value='display_mode'),
+
             'Edit tops:', 
             dcc.Dropdown(id='top-selector', options=dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
             
@@ -74,7 +63,7 @@ app.layout = html.Div(
             
             html.Hr(),
             'Curve Select:', html.Br(),
-            dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, placeholder="Select a curve", style={'width': '200px'}),
+            dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value=curve, placeholder="Select a curve", style={'width': '200px'}),
             
             html.Hr(),
             "Write tops to file:",
@@ -88,8 +77,8 @@ app.layout = html.Div(
         dcc.Graph(id="well_plot", 
                     figure=fig_well_1,
                     style={'width': '60%', 'height':'900px'},
-                    animate=True), # prevents axis rescaling on graph update
-                    
+                    animate=False), # prevents axis rescaling on graph update
+
         html.Div([
             # hidden_div for storing tops data as json
             # Currently not hidden for debugging purposes. change style={'display': 'none'}
@@ -105,6 +94,17 @@ app.layout = html.Div(
     ],
     style={'display': 'flex'}
 )
+
+@app.callback(
+    Output('well_plot', 'animate'),
+    [Input('mode-selector', 'value')])
+def set_animate(mode):
+    if mode == 'display_mode':
+        return False
+    elif mode == 'tops_mode':
+        return True
+
+
 
 # update tops data when graph is clicked or new top is added
 @app.callback(
@@ -150,14 +150,12 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
     Output("well_plot", "figure"),
     [Input('tops-storage', 'children'),
      Input('curve-selector', 'value')]
-             )
+    )
 def update_figure(surface_picks, curve):
     """redraw the plot when the data in tops-storage is updated"""  
     surface_picks = json.loads(surface_picks)
     
-    curve = curve if curve is not None else curve_list[0]
-    print(curve) ##This is working to print the selected value to the console, so curve value is changing
-    print(df[curve])
+   
     # regenerate figure with the new horizontal line
     """this is not updating the figure for the newly selected curve"""
     fig = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
