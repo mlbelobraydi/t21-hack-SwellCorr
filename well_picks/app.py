@@ -41,6 +41,8 @@ curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]
 # draw the initial plot
 fig_well_1 = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
 fig_well_1.update_yaxes(autorange="reversed")
+fig_well_1.layout.xaxis.fixedrange = True
+fig.layout.template = 'plotly_white'
 helper.update_picks_on_plot(fig_well_1, surface_picks)
 
 
@@ -70,7 +72,7 @@ app.layout = html.Div(
         ]),
         dcc.Graph(id="well_plot", 
                     figure=fig_well_1,
-                    style={'width': '60%', 'height':'900px'}), 
+                    style={'width': '600', 'height':'1500px'}), 
 
         html.Div([
             # hidden_div for storing tops data as json
@@ -144,6 +146,8 @@ def update_figure(surface_picks, curve):
 
     fig.layout = {'uirevision': curve} # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
     fig.update_yaxes(autorange="reversed")
+    fig.layout.xaxis.fixedrange = True
+    fig.layout.template = 'plotly_white'
     helper.update_picks_on_plot(fig, surface_picks)
     
     return fig
