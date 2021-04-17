@@ -43,7 +43,7 @@ fig_well_1 = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index
 fig_well_1.update_yaxes(autorange="reversed")
 helper.update_picks_on_plot(fig_well_1, surface_picks)
 
-
+app.title = "SwellCorr"
 app.layout = html.Div(
     children=[
         html.Div([

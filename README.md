@@ -17,3 +17,8 @@ Open source manual well correlation tools are nearly non-existent. Well correlat
 Link to Transfrom 2021 discussion: https://github.com/softwareunderground/transform-2021-hackathon/discussions/12
 
 Initial project Kanban: https://github.com/mlbelobraydi/t21-hack-wellcorr/projects/1
+
+
+## Credits 
+
+Photo and icon from [Jamie Davies](https://unsplash.com/@jamie_davies?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unspash](https://unsplash.com/s/photos/swell?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText)
