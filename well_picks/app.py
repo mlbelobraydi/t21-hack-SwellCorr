@@ -42,7 +42,7 @@ curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]
 fig_well_1 = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
 fig_well_1.update_yaxes(autorange="reversed")
 fig_well_1.layout.xaxis.fixedrange = True
-fig.layout.template = 'plotly_white'
+fig_well_1.layout.template = 'plotly_white'
 helper.update_picks_on_plot(fig_well_1, surface_picks)
 
 
