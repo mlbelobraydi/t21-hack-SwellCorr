@@ -49,51 +49,62 @@ fig_well_1.layout.template = 'plotly_white' ##template for the plotly figure
 helper.update_picks_on_plot(fig_well_1, surface_picks) ## helper script updates the top picks on the figure
 
 app.title = "SwellCorr"
-app.layout = html.Div(
-    children=[
-        html.Div([
-            'Select well:', ##Well selector
-            dcc.Dropdown(id='well-selector', options=well_dropdown_options, value=well_uwi[0], style={'width': '200px'}),
+app.layout = html.Div(children=[
+    html.Div(
+        children=[
+            html.H4('SwellCorr well correlation')
+        ]
+    ),
+    html.Div(
+        children=[
+            html.Div([
+                'Select well:', ##Well selector
+                dcc.Dropdown(id='well-selector', options=well_dropdown_options, value=well_uwi[0], style={'width': '200px'}),
 
-            'Edit tops:', ##existing top to edit selector
-            dcc.Dropdown(id='top-selector', options=tops_dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
+                'Edit tops:', ##existing top to edit selector
+                dcc.Dropdown(id='top-selector', options=tops_dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
+                
+                html.Hr(),
+                'Create a new surface pick:', html.Br(), ##dialog to creat a new well top correlation for a well
+                dcc.Input(id='new-top-name', placeholder='Name for new top', type='text', value=''),
+                html.Button('Create', id='new-top-button'),
+                
+                html.Hr(),
+                'Curve Select:', html.Br(), ##well log curve selector
+                dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value=curve, placeholder="Select a curve", style={'width': '200px'}),
+                
+                html.Hr(),
+                "Write tops to file:", ##input box and button for outputting well correlation results to file
+                dcc.Input(id='input-save-path', type='text', placeholder='path_to_save_picks.json', value=''),
+                html.Button('Save Tops', id='save-button', n_clicks=0),
+
+                html.Hr(), ##button to update the Striplog dict on the page
+                html.Button('Update Striplog', id='gen-striplog-button')
+
+            ]),
+            dcc.Graph(id="well_plot", 
+                        figure=fig_well_1,
+                        style={'width': '200', 'height':'1000px'}), ##figure of log curve with well tops
+
+            html.Div([
+                # hidden_div for storing tops data as json
+                # Currently not hidden for debugging purposes. change style={'display': 'none'}
+                html.Div(id='tops-storage', children=json.dumps(surface_picks)),#, style={'display': 'none'}),
+
+                html.Hr(),
+                html.H4('Striplog CSV Text:'),
+                html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
+            ]),
             
-            html.Hr(),
-            'Create a new surface pick:', html.Br(), ##dialog to creat a new well top correlation for a well
-            dcc.Input(id='new-top-name', placeholder='Name for new top', type='text', value=''),
-            html.Button('Create', id='new-top-button'),
-            
-            html.Hr(),
-            'Curve Select:', html.Br(), ##well log curve selector
-            dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value=curve, placeholder="Select a curve", style={'width': '200px'}),
-            
-            html.Hr(),
-            "Write tops to file:", ##input box and button for outputting well correlation results to file
-            dcc.Input(id='input-save-path', type='text', placeholder='path_to_save_picks.json', value=''),
-            html.Button('Save Tops', id='save-button', n_clicks=0),
-
-            html.Hr(), ##button to update the Striplog dict on the page
-            html.Button('Update Striplog', id='gen-striplog-button')
-
-        ]),
-        dcc.Graph(id="well_plot", 
-                    figure=fig_well_1,
-                    style={'width': '200', 'height':'1000px'}), ##figure of log curve with well tops
-
-        html.Div([
-            # hidden_div for storing tops data as json
-            # Currently not hidden for debugging purposes. change style={'display': 'none'}
-            html.Div(id='tops-storage', children=json.dumps(surface_picks)),#, style={'display': 'none'}),
-
-            html.Hr(),
-            html.H4('Striplog CSV Text:'),
-            html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
-        ]),
-        
-        # hidden_div for storing un-needed output
-        html.Div(id='placeholder', style={'display': 'none'})
-    ],
-    style={'display': 'flex'}
+            # hidden_div for storing un-needed output
+            html.Div(id='placeholder', style={'display': 'none'})
+        ],
+        style={'display': 'flex'}
+    ),
+    html.Div(
+        html.P(children=['The swell way of correlating wells'])
+    )
+    ]
 )
 
 # update curve dropdown options when new well is picked
