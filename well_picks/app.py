@@ -10,6 +10,7 @@ import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
+import numpy as np
 
 import helper
 
@@ -29,26 +30,24 @@ curve_list = df.columns.tolist() ##gets the column names for later use in the cu
 curve = curve_list[0] ##gets the first curve name to be used as the first curve displayed in the plotly figure
 
 ## Load well top data
-"""sample pick data, this will eventually need to load data from file or other source into the current dict"""
-surface_picks = {"mannville": 200, "t31": 337, "t21": 348, "t15": 354, 
-                 "e14": 354, "t11": 355, "t10.5": 357, "e10": 361.9, "mcmurray": 361.9, "paleozoic": 420.5
-                 }
+surface_picks_df = pd.read_table(Path('./well_picks/data/McMurray_data/PICKS.TXT'),
+                                usecols=['UWI', 'PICK', 'MD'])
 
 
 
 #well dropdown selector
-well_dropdown_options = [{'label': k, 'value': k} for k in well_uwi] ##list of wells to the dropdown
+well_dropdown_options = [{'label': k, 'value': k} for k in sorted(well_uwi)] ##list of wells to the dropdown
 #tops dropdown options
-tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())] ##list of tops to the dropdown
+"""we need to have a stratigraphic column at some point"""
+tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks_df['PICK'].unique())] ##list of tops to the dropdown
 ##well log curve dropdown options
-curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##list of well log curves to the dropdown
+curve_dropdown_options = [{'label': k, 'value': k} for k in sorted(curve_list)] ##list of well log curves to the dropdown
 
 # draw the initial plot
 fig_well_1 = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name}) ##polot data and axis lables
 fig_well_1.update_yaxes(autorange="reversed") ## flips the y-axis to increase down assuming depth increases
 fig_well_1.layout.xaxis.fixedrange = True ##forces the x axis to a fixed range based on the curve data
 fig_well_1.layout.template = 'plotly_white' ##template for the plotly figure
-helper.update_picks_on_plot(fig_well_1, surface_picks) ## helper script updates the top picks on the figure
 
 app.title = "SwellCorr"
 app.layout = html.Div(children=[
@@ -91,7 +90,7 @@ app.layout = html.Div(children=[
             html.Div([
                 # hidden_div for storing tops data as json
                 # Currently not hidden for debugging purposes. change style={'display': 'none'}
-                html.Div(id='tops-storage', children=json.dumps(surface_picks)),#, style={'display': 'none'}),
+                html.Div(id='tops-storage', children=surface_picks_df.to_json()),#, style={'display': 'none'}),
 
                 html.Hr(),
                 html.H4('Striplog CSV Text:'),
@@ -118,7 +117,7 @@ app.layout = html.Div(children=[
 def well_update_changes_curves(well_uwi): ##def for updating curve list and curves
     w = p.get_well(well_uwi) ## identifies and gets the correct welly.Well object based on well_uwi
     df = w.df() ## creates dataframe from welly.Well object
-    curve_list = df.columns.tolist() ##gets curve list for welly.Well object
+    curve_list = sorted(df.columns.tolist()) ##gets curve list for welly.Well object
     curve = curve_list[0] ##identifies the first curve in list for default figure
     curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##creates dropdown list
     return curve_dropdown_options, curve ##returns the dropdown list options and the initial curve
@@ -131,8 +130,10 @@ def well_update_changes_curves(well_uwi): ##def for updating curve list and curv
      Input('new-top-button', 'n_clicks')],
     [State("top-selector", "value"),
      State("tops-storage", "children"),
-     State('new-top-name', 'value')])
-def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks, new_top_name):
+     State('new-top-name', 'value'),
+     State('well-selector', 'value'),
+     State('top-selector', 'options')])
+def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks, new_top_name, active_well, tops_options):
     """Update the json stored in tops-storage div based on y-value of click"""
     
     # Each element in the app can only be updated by one call back function.
@@ -140,7 +141,7 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
     # We need to use the dash.callback_context to determine which event triggered
     # the callback and determine which actions to take
     # https://dash.plotly.com/advanced-callbacks    
-    surface_picks = json.loads(surface_picks)
+    surface_picks_df = pd.read_json(surface_picks)
     
     # get callback context
     ctx = callback_context
@@ -154,31 +155,32 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
         if active_pick:
             y = clickData['points'][0]['y']
 
-            # update the tops depth dict
-            surface_picks[active_pick] = y
-            surface_picks.pop("", None)
-
+            # update the tops depth df
+            surface_picks_df.loc[(surface_picks_df['UWI']==active_well) & (surface_picks_df['PICK'] == active_pick), 'MD'] = y
+            
     if event_elem_id == "new-top-button": # click was on the new top button
-        surface_picks[new_top_name] = "" # insert a new top
+        if not new_top_name in tops_options.values():
+            pick = {'UWI': active_well, 'PICK': new_top_name, 'MD': np.nan} 
+            surface_picks_df = surface_picks_df.append(pick, ignore_index=True).drop_duplicates(subset=['UWI', 'PICK'], keep='last')
 
-    return json.dumps(surface_picks)
+    return surface_picks_df.to_json() 
 
 # Update graph when tops storage changes
 @app.callback(
     Output("well_plot", "figure"),
     [Input('tops-storage', 'children'),
      Input('curve-selector', 'value')],
-     [State('well-selector', 'value')] ##With multiple wells the state of the well_uwi must be passed to select the right welly.Well
+     [State('well-selector', 'value')] ## With multiple wells the state of the well_uwi must be passed to select the right welly.Well
     )
-def update_figure(surface_picks, curve, well_uwi):
+def update_figure(surface_picks, curve, active_well):
     """redraw the plot when the data in tops-storage is updated"""  
-    surface_picks = json.loads(surface_picks)
-    
-    w = p.get_well(well_uwi) ##selects the correct welly.Well object
+    surface_picks = pd.read_json(surface_picks)
+    surface_picks = surface_picks[surface_picks['UWI'] == active_well]
+
+    w = p.get_well(active_well) ##selects the correct welly.Well object
     df = w.df() ##reloads the correct dataframe for the display
 
     # regenerate figure with the new horizontal line
-    """this is not updating the figure for the newly selected curve"""
     fig = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
 
     fig.layout = {'uirevision': curve} # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
@@ -197,9 +199,8 @@ def update_figure(surface_picks, curve, well_uwi):
 def update_dropdown_options(surface_picks):
     """update the options available in the dropdown when a new top is added"""
     
-    surface_picks = json.loads(surface_picks)
-
-    tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())]
+    surface_picks = pd.read_json(surface_picks)
+    tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks_df['PICK'].unique())]
     return tops_dropdown_options
 
 # Write tops to external file
@@ -209,12 +210,12 @@ def update_dropdown_options(surface_picks):
     [State('tops-storage', 'children'),
     State('input-save-path', 'value')])
 def save_picks(n_clicks, surface_picks, path):
-    """Save out picks to a csv file. 
+    """Save out picks to a json file. 
     TODO: I am sure there are better ways to handle saving out picks, but this is proof of concept"""
     #picks_df = pd.read_json(surface_picks)
 
     if path:
-        path_to_save = Path('.') / 'well_picks' / 'pick_data' / path
+        path_to_save = Path('.') / 'well_picks' / 'data' / 'updates' / path
         with open(path_to_save, 'w') as f:
             json.dump(surface_picks, fp=f)
 
@@ -223,14 +224,15 @@ def save_picks(n_clicks, surface_picks, path):
 # create striplog csv text
 @app.callback(
     Output('striplog-txt', 'children'),
-    [Input('gen-striplog-button', 'n_clicks')],
+    [Input('gen-striplog-button', 'n_clicks'),
+    Input('well-selector', 'value')],
     [State('tops-storage', 'children')])
-def generate_striplog(n_clicks, surface_picks):
-    surface_picks = json.loads(surface_picks)
-    surface_picks = {key:val for key, val in surface_picks.items() if (key and val)}
-    
-    s = helper.surface_pick_dict_to_striplog(surface_picks)
-    return json.dumps(s.to_csv())
+def generate_striplog(n_clicks, active_well, surface_picks):
+    print(active_well)
+    surface_picks = pd.read_json(surface_picks)
+    surface_picks = surface_picks[surface_picks['UWI'] == active_well]   
+    s = helper.surface_pick_to_striplog(surface_picks)
+    return json.dumps(s)
 
 if __name__ == "__main__":
     app.run_server(port=4545, debug=True)
