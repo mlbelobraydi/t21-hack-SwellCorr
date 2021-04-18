@@ -16,7 +16,7 @@
  SRVC.    Schlumberger D&M              :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    28-Apr-09                     :LOG DATE
- UWI .                                  :UNIQUE WELL ID
+ UWI .    Poseidon 1                    :UNIQUE WELL ID
  LATI.DEG -13/37/16.79                   : Latitude
  LONG.DEG 122/18/23.99                  : Longitude
  GDAT.                                  : Geodetic Datum

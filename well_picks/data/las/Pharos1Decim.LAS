@@ -16,7 +16,7 @@
  SRVC.    Schlumberger                  :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    11                            :LOG DATE
- UWI .                                  :UNIQUE WELL ID
+ UWI .    Pharos 1                      :UNIQUE WELL ID
  LATI.DEG -13/40/55.21                   : Latitude
  LONG.DEG 122/23/56.48                  : Longitude
  GDAT.                                  : Geodetic Datum

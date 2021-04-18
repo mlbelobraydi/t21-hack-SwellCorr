@@ -16,7 +16,7 @@
  SRVC.    Schlumberger                  :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    05/20/2014                    :LOG DATE
- UWI .                                  :UNIQUE WELL ID
+ UWI .    Poseidon North 1              :UNIQUE WELL ID
  LATI.DEG -13/34/24.825                  : Latitude
  LONG.DEG 122/20/24.556                 : Longitude
  GDAT.                                  : Geodetic Datum

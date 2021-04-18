@@ -16,7 +16,7 @@
  SRVC.    Schlumberger                  :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    04/29/2010                    :LOG DATE
- UWI .                                  :UNIQUE WELL ID
+ UWI .    Kronos 1                      :UNIQUE WELL ID
  LATI.DEG -13/41/53.98                   : Latitude
  LONG.DEG 122/11/30.24                  : Longitude
  GDAT.                                  : Geodetic Datum
