@@ -21,7 +21,7 @@ server = app.server
 # # load well data
 """Need to add a method for the user to point to the directory or add additional las files later"""
 #w = Well.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS"))) #original example
-p = Project.from_las(str(Path("well_picks/data/las/*.LAS")))
+p = Project.from_las(str(Path("well_picks/data/McMurray_data/las/*.LAS")))
 well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selector tool
 
 df = p[0].df() ##gets data from the first well in the Welly Project
@@ -30,7 +30,9 @@ curve = curve_list[0] ##gets the first curve name to be used as the first curve 
 
 ## Load well top data
 """sample pick data, this will eventually need to load data from file or other source into the current dict"""
-surface_picks = {"Sea Bed": 520.4, "Montara Formation": 4620, "Plover Formation (Top Volcanics)": 4703.2, "Plover Formation (Top Reservoir)": 4798.4, "Nome Formation": 5079}
+surface_picks = {"mannville": 200, "t31": 337, "t21": 348, "t15": 354, 
+                 "e14": 354, "t11": 355, "t10.5": 357, "e10": 361.9, "mcmurray": 361.9, "paleozoic": 420.5
+                 }
 
 
 
