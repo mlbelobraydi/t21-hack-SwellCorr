@@ -113,19 +113,13 @@ app.layout = html.Div(children=[
     [Output('curve-selector', 'options'),
      Output('curve-selector', 'value')],
     [Input('well-selector', 'value')])
-def well_update_changes_curves(well_uwi):
-    
-    #surface_picks = json.loads(surface_picks)
-
-    w = p.get_well(well_uwi)
-    print('selected well:', w)
-    df = w.df() 
-    curve_list = df.columns.tolist()
-    curve = curve_list[0]
-
-    print('initial curve: ',curve)
-    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]
-    return curve_dropdown_options, curve
+def well_update_changes_curves(well_uwi): ##def for updating curve list and curves
+    w = p.get_well(well_uwi) ## identifies and gets the correct welly.Well object based on well_uwi
+    df = w.df() ## creates dataframe from welly.Well object
+    curve_list = df.columns.tolist() ##gets curve list for welly.Well object
+    curve = curve_list[0] ##identifies the first curve in list for default figure
+    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##creates dropdown list
+    return curve_dropdown_options, curve ##returns the dropdown list options and the initial curve
 
 
 # update tops data when graph is clicked or new top is added
