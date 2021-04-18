@@ -1,4 +1,4 @@
-# t21-hack-wellcorr
+# t21-hack-Swellcorr
 Repository for the Transform 2021 Hack-a-Thon Well Correlation project
 
 ## Description
@@ -16,7 +16,7 @@ Open source manual well correlation tools are nearly non-existent. Well correlat
 
 Link to Transfrom 2021 discussion: https://github.com/softwareunderground/transform-2021-hackathon/discussions/12
 
-Initial project Kanban: https://github.com/mlbelobraydi/t21-hack-wellcorr/projects/1
+Initial project Kanban: https://github.com/mlbelobraydi/t21-hack-Swellcorr/projects/1
 
 
 ## Credits 
