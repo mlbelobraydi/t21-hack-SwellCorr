@@ -19,12 +19,12 @@ app = Dash(__name__)
 server = app.server
 
 # # load well data
-# p = Project.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS")))
-# well_names = [w.name for w in p]
+p = Project.from_las(str(Path("well_picks/data/las/*.LAS")))
+well_uwi = [w.uwi for w in p]
 
-w = Well.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS"))) #original example
+#w = Well.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS"))) #original example
 
-df = w.df()
+df = p[0].df()
 curve_list = df.columns.tolist()
 curve = curve_list[0]
 
@@ -33,7 +33,9 @@ surface_picks = {"Sea Bed": 520.4, "Montara Formation": 4620, "Plover Formation 
 
 
 
-
+#well dropdown selector
+well_dropdown_options = [{'label': k, 'value': k} for k in well_uwi]
+#tops dropdown options
 dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())]
 ##Need to make the selector grab the wanted curve
 curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]
@@ -47,6 +49,9 @@ app.title = "SwellCorr"
 app.layout = html.Div(
     children=[
         html.Div([
+            'Select well:', 
+            dcc.Dropdown(id='well-selector', options=well_dropdown_options, value=well_uwi[0], style={'width': '200px'}),
+
             'Edit tops:', 
             dcc.Dropdown(id='top-selector', options=dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
             
@@ -87,6 +92,25 @@ app.layout = html.Div(
     ],
     style={'display': 'flex'}
 )
+
+# update curve dropdown options when new well is picked
+"""update of new curve selector list when new well is triggered"""
+@app.callback(
+    [Output('curve-selector', 'options'),
+     Output('curve-selector', 'value')],
+    [Input('well-selector', 'value')])
+def well_update_changes_curves(well_uwi):
+    
+    #surface_picks = json.loads(surface_picks)
+
+    w = p.get_well(well_uwi)
+    print('selected well:', w)
+    df = w.df()
+    curve_list = df.columns.tolist()
+    curve = curve_list[0]
+    print('initial curve: ',curve)
+    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]
+    return curve_dropdown_options, curve
 
 
 # update tops data when graph is clicked or new top is added

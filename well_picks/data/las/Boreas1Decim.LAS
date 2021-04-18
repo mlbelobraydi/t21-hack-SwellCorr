@@ -16,7 +16,7 @@
  SRVC.    Schlumberger                  :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    7                             :LOG DATE
- UWI .                                  :UNIQUE WELL ID
+ UWI .    Boreas 1                      :UNIQUE WELL ID
  LATI.DEG -13/39/24.872                  : Latitude
  LONG.DEG 122/17/52.787                 : Longitude
  GDAT.                                  : Geodetic Datum

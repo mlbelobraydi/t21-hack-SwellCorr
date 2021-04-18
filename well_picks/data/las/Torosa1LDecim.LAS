@@ -16,7 +16,7 @@
  SRVC.    Sperry/Schlumberger /Occam    :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    15/12/2006 / 2009             :LOG DATE
- UWI .                                  :UNIQUE WELL ID
+ UWI .    Torosa 1                      :UNIQUE WELL ID
  LATI.DEG -13/52/02.03                   : Latitude
  LONG.DEG 122/04/09.59                  : Longitude
  GDAT.                                  : Geodetic Datum

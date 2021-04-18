@@ -16,7 +16,7 @@
  SRVC.     Schlumberger / Occam Technology :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    08/31/2013 / 2016             :LOG DATE
- UWI .                                  :UNIQUE WELL ID
+ UWI .    Proteus 1 ST2                 :UNIQUE WELL ID
  LATI.DEG -00/00/00                      : Latitude
  LONG.DEG 00/00/00                      : Longitude
  GDAT.                                  : Geodetic Datum
