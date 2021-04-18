@@ -1,7 +1,7 @@
-from welly import Well, Project
+from welly import Well, Project ##Welly is used to organize the well data and project collection
 
-import plotly.express as px
-from dash import Dash, callback_context
+import plotly.express as px ##plotly is used as the main display functionality
+from dash import Dash, callback_context ##dash is used to update the plot and fields dynamically in a web browser
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
@@ -19,65 +19,66 @@ app = Dash(__name__)
 server = app.server
 
 # # load well data
-p = Project.from_las(str(Path("well_picks/data/las/*.LAS")))
-well_uwi = [w.uwi for w in p]
-
+"""Need to add a method for the user to point to the directory or add additional las files later"""
 #w = Well.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS"))) #original example
+p = Project.from_las(str(Path("well_picks/data/las/*.LAS")))
+well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selector tool
 
-df = p[0].df()
-curve_list = df.columns.tolist()
-curve = curve_list[0]
+df = p[0].df() ##gets data from the first well in the Welly Project
+curve_list = df.columns.tolist() ##gets the column names for later use in the curve-selector tool
+curve = curve_list[0] ##gets the first curve name to be used as the first curve displayed in the plotly figure
 
-# sample pick data, eventually load from file or other source into dict
+## Load well top data
+"""sample pick data, this will eventually need to load data from file or other source into the current dict"""
 surface_picks = {"Sea Bed": 520.4, "Montara Formation": 4620, "Plover Formation (Top Volcanics)": 4703.2, "Plover Formation (Top Reservoir)": 4798.4, "Nome Formation": 5079}
 
 
 
 #well dropdown selector
-well_dropdown_options = [{'label': k, 'value': k} for k in well_uwi]
+well_dropdown_options = [{'label': k, 'value': k} for k in well_uwi] ##list of wells to the dropdown
 #tops dropdown options
-dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())]
-##Need to make the selector grab the wanted curve
-curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]
+tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())] ##list of tops to the dropdown
+##well log curve dropdown options
+curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##list of well log curves to the dropdown
 
 # draw the initial plot
-fig_well_1 = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
-fig_well_1.update_yaxes(autorange="reversed")
-fig_well_1.layout.xaxis.fixedrange = True
-fig_well_1.layout.template = 'plotly_white'
-helper.update_picks_on_plot(fig_well_1, surface_picks)
+fig_well_1 = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name}) ##polot data and axis lables
+fig_well_1.update_yaxes(autorange="reversed") ## flips the y-axis to increase down assuming depth increases
+fig_well_1.layout.xaxis.fixedrange = True ##forces the x axis to a fixed range based on the curve data
+fig_well_1.layout.template = 'plotly_white' ##template for the plotly figure
+helper.update_picks_on_plot(fig_well_1, surface_picks) ## helper script updates the top picks on the figure
 
 app.title = "SwellCorr"
 app.layout = html.Div(
     children=[
         html.Div([
-            'Select well:', 
+            'Select well:', ##Well selector
             dcc.Dropdown(id='well-selector', options=well_dropdown_options, value=well_uwi[0], style={'width': '200px'}),
 
-            'Edit tops:', 
-            dcc.Dropdown(id='top-selector', options=dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
+            'Edit tops:', ##existing top to edit selector
+            dcc.Dropdown(id='top-selector', options=tops_dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
             
             html.Hr(),
-            'Create a new surface pick:', html.Br(),
+            'Create a new surface pick:', html.Br(), ##dialog to creat a new well top correlation for a well
             dcc.Input(id='new-top-name', placeholder='Name for new top', type='text', value=''),
             html.Button('Create', id='new-top-button'),
             
             html.Hr(),
-            'Curve Select:', html.Br(),
+            'Curve Select:', html.Br(), ##well log curve selector
             dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value=curve, placeholder="Select a curve", style={'width': '200px'}),
             
             html.Hr(),
-            "Write tops to file:",
+            "Write tops to file:", ##input box and button for outputting well correlation results to file
             dcc.Input(id='input-save-path', type='text', placeholder='path_to_save_picks.json', value=''),
             html.Button('Save Tops', id='save-button', n_clicks=0),
 
-            html.Hr(),
+            html.Hr(), ##button to update the Striplog dict on the page
             html.Button('Update Striplog', id='gen-striplog-button')
 
         ]),
         dcc.Graph(id="well_plot", 
                     figure=fig_well_1,
-                    style={'width': '600', 'height':'1500px'}), 
+                    style={'width': '200', 'height':'1000px'}), ##figure of log curve with well tops
 
         html.Div([
             # hidden_div for storing tops data as json
@@ -86,7 +87,7 @@ app.layout = html.Div(
 
             html.Hr(),
             html.H4('Striplog CSV Text:'),
-            html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),
+            html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
         ]),
         
         # hidden_div for storing un-needed output
@@ -107,9 +108,10 @@ def well_update_changes_curves(well_uwi):
 
     w = p.get_well(well_uwi)
     print('selected well:', w)
-    df = w.df()
+    df = w.df() 
     curve_list = df.columns.tolist()
     curve = curve_list[0]
+
     print('initial curve: ',curve)
     curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]
     return curve_dropdown_options, curve
@@ -158,12 +160,16 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
 @app.callback(
     Output("well_plot", "figure"),
     [Input('tops-storage', 'children'),
-     Input('curve-selector', 'value')]
+     Input('curve-selector', 'value')],
+     [State('well-selector', 'value')] ##With multiple wells the state of the well_uwi must be passed to select the right welly.Well
     )
-def update_figure(surface_picks, curve):
+def update_figure(surface_picks, curve, well_uwi):
     """redraw the plot when the data in tops-storage is updated"""  
     surface_picks = json.loads(surface_picks)
-       
+    
+    w = p.get_well(well_uwi) ##selects the correct welly.Well object
+    df = w.df() ##reloads the correct dataframe for the display
+
     # regenerate figure with the new horizontal line
     """this is not updating the figure for the newly selected curve"""
     fig = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
@@ -186,8 +192,8 @@ def update_dropdown_options(surface_picks):
     
     surface_picks = json.loads(surface_picks)
 
-    dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())]
-    return dropdown_options
+    tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks.keys())]
+    return tops_dropdown_options
 
 # Write tops to external file
 @app.callback(
