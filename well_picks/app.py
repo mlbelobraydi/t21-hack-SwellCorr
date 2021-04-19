@@ -4,6 +4,7 @@ import plotly.express as px ##plotly is used as the main display functionality
 from dash import Dash, callback_context ##dash is used to update the plot and fields dynamically in a web browser
 import dash_core_components as dcc
 import dash_html_components as html
+import flask
 from dash.dependencies import Input, Output, State
 
 import json
@@ -157,10 +158,12 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
             y = clickData['points'][0]['y']
 
             # update the tops depth df
-            surface_picks_df.loc[(surface_picks_df['UWI']==active_well) & (surface_picks_df['PICK'] == active_pick), 'MD'] = y
-            
+            pick = {'UWI': active_well, 'PICK': active_pick, 'MD': y} 
+            surface_picks_df = surface_picks_df.append(pick, ignore_index=True).drop_duplicates(subset=['UWI', 'PICK'], keep='last')
+    
     if event_elem_id == "new-top-button": # click was on the new top button
-        if not new_top_name in tops_options.values():
+        options = [d['value'] for d in tops_options] # tops_options is list of dicts eg [{'label': pick, 'value': pick}]
+        if not new_top_name in options:
             pick = {'UWI': active_well, 'PICK': new_top_name, 'MD': np.nan} 
             surface_picks_df = surface_picks_df.append(pick, ignore_index=True).drop_duplicates(subset=['UWI', 'PICK'], keep='last')
 
@@ -201,8 +204,9 @@ def update_dropdown_options(surface_picks):
     """update the options available in the dropdown when a new top is added"""
     
     surface_picks = pd.read_json(surface_picks)
-    tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks_df['PICK'].unique())]
+    tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks['PICK'].unique())]
     return tops_dropdown_options
+
 
 # Write tops to external file
 @app.callback(
