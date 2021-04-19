@@ -95,6 +95,7 @@ app.layout = html.Div(children=[
                 html.Hr(),
                 html.H4('Striplog CSV Text:'),
                 html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
+                html.Img(id='corr-plot', src='https://images.squarespace-cdn.com/content/58a4b31dbebafb6777c575b4/1549829488328-IZMTRHP7SLI9P9Z7MUSW/website_logo_head.png?content-type=image%2Fpng')
             ]),
             
             # hidden_div for storing un-needed output
