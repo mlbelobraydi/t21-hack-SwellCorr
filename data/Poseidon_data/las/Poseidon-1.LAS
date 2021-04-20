@@ -9,14 +9,14 @@
  STEP.M             0.5000              :STEP
  NULL.             -999.25              :NULL VALUE
  COMP.    ConocoPhillips                :COMPANY
- WELL.    Poseidon 1                    :WELL
+ WELL.    Poseidon-1                    :WELL
  FLD .    Exploration                   :FIELD
  LOC .                                  :LOCATION
  PROV.                                  :PROVINCE
  SRVC.    Schlumberger D&M              :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    28-Apr-09                     :LOG DATE
- UWI .    Poseidon 1                    :UNIQUE WELL ID
+ UWI .    Poseidon-1                              :UNIQUE WELL ID
  LATI.DEG -13/37/16.79                   : Latitude
  LONG.DEG 122/18/23.99                  : Longitude
  GDAT.                                  : Geodetic Datum
@@ -24,15 +24,15 @@
 ~CURVE INFORMATION
 #MNEM    .UNIT     API CODE             Curve Description
  DEPT    .M                             :   Along hole depth
- ECGR    .gAPI                          :   EDTC Corrected Gamma-Ray
+ GR      .gAPI                          :   EDTC Corrected Gamma-Ray
  ATRX    .ohm.m                         :   Array Induction Two Foot Rxo
  ATRT    .ohm.m                         :   Array Induction Two Foot Rt
  NPHI    .pu                            :   Thermal Neutron Porosity (Ratio Method)
  CAL1    .in                            :   Caliper 1
  HDAR    .in                            :   Hole Diameter from Area
  HROM    .g/cm3                         :   LDS High Resolution Corrected Bulk Density
- DTSM    .us/ft                         :   Delta-T Shear
- DTCO    .us/ft                         :   Delta-T Compressional
+ DTS    .us/ft                         :   Delta-T Shear
+ DT    .us/ft                         :   Delta-T Compressional
 #
 # Curve              Start        Stop     Minimum     Maximum
 # ------------------------------------------------------------
@@ -65,15 +65,15 @@
 # HOLE AND CASING DATA:
 # 	Hole 	Hole	Casing	Casing 	Weight	Grade	Joints	Cement	TOC
 # 	Size	Depth	Size	Depth	lb/ft
-# 	36”	581.8m	30”	578m	310	X-52	5	1105 sx G at SG 1.9	Seafloor
-# 								185 sx G at SG 1.9 – top up
-# 	17.5”	2296m	13 3/8”	2287.5m	72	P-110	143	688 sx G at SG 1.5
+# 	36ï¿½	581.8m	30ï¿½	578m	310	X-52	5	1105 sx G at SG 1.9	Seafloor
+# 								185 sx G at SG 1.9 ï¿½ top up
+# 	17.5ï¿½	2296m	13 3/8ï¿½	2287.5m	72	P-110	143	688 sx G at SG 1.5
 # 								500 sx G at SG 1.9
-# 	12.25”	3898m	9 5/8”	3890.8m	53.5	P-110	274	202 sx G at SG 1.62	
+# 	12.25ï¿½	3898m	9 5/8ï¿½	3890.8m	53.5	P-110	274	202 sx G at SG 1.62	
 # 								133 sx G at SG 1.98
-# 	9.5”	3965m	7 5/8”	3957m	30.5	EX-80	14	
-# 	8.5”	4588m	7”	4587.5m	32 / 29	P110/L80	47/20	213 sx G at SG 1.9
-# 	6”	5112.1m	5”	5088.4m	18	P-110	72	116 sx G at SG 1.9
+# 	9.5ï¿½	3965m	7 5/8ï¿½	3957m	30.5	EX-80	14	
+# 	8.5ï¿½	4588m	7ï¿½	4587.5m	32 / 29	P110/L80	47/20	213 sx G at SG 1.9
+# 	6ï¿½	5112.1m	5ï¿½	5088.4m	18	P-110	72	116 sx G at SG 1.9
 # #
 # TEMPERATURES:
 # 	Depth Driller	Logger	Temp	Log Type	Time since circ	Circ Time

@@ -9,14 +9,14 @@
  STEP.M             0.5000              :STEP
  NULL.             -999.25              :NULL VALUE
  COMP.                                  :COMPANY
- WELL.    Poseidon 2                    :WELL
+ WELL.    Poseidon-2                    :WELL
  FLD .                                  :FIELD
  LOC .                                  :LOCATION
  PROV.                                  :PROVINCE
  SRVC.    Schlumberger                  :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    11/30/2009                    :LOG DATE
- UWI .    Poseidon 2                    :UNIQUE WELL ID
+ UWI .    Poseidon-2                              :UNIQUE WELL ID
  LATI.DEG -13/40/07.177                  : Latitude
  LONG.DEG 122/16/32.259                 : Longitude
  GDAT.                                  : Geodetic Datum
@@ -27,11 +27,11 @@
  GR      .GAPI                          :   (RM)    (ARC[1])                (60)      Gamma Ray
  RS      .OHMM                          :   (RM)    (ARC[1])                (60)      Phase Shift Resistivity 16 inch Spacing at 2 MHz, Environmentally Corrected.
  RD      .OHMM                          :   (RM)    (ARC[1])                (60)      Phase Shift Resistivity 34 inch Spacing at 2 MHz, Environmentally Corrected.
- DTCO    .US/F                          :   Delta-T Compressional
- DTSM    .us/ft                         :   Delta-T Shear
+ DT    .US/F                          :   Delta-T Compressional
+ DTS    .us/ft                         :   Delta-T Shear
  DCAV    .IN                            :   (RM)    (ECO[1])                (60)      Density Caliper, Average
  RHOB    .G/C3                          :   (RM)    (ECO[1])                (60)      Bulk Density
- TNP     .PU                            :   (RM)    (ECO[1])                (60)      Thermal Neutron Porosity (Ratio Method) in Selected Lithology
+ NPHI     .PU                            :   (RM)    (ECO[1])                (60)      Thermal Neutron Porosity (Ratio Method) in Selected Lithology
 #
 # Curve              Start        Stop     Minimum     Maximum
 # ------------------------------------------------------------
@@ -241,12 +241,12 @@
 # HOLE AND CASING DATA:
 # 	Hole 	Hole	Casing	Casing 	Weight	Grade	Joints	Cement	TOC
 # 	Size	Depth	Size	Depth	lb/ft
-# 	36”	578m	30”	576.4m	
-# 	17.5”	2429m	13 3/8”	2421.7m	72	P110		730 sx G at SG 1.5
+# 	36ï¿½	578m	30ï¿½	576.4m	
+# 	17.5ï¿½	2429m	13 3/8ï¿½	2421.7m	72	P110		730 sx G at SG 1.5
 # 								555 sx G at SG 1.9
-# 	12.25”	4106m	9 5/8”	4098.4m	53.5	P110	289	520 sx G at SG 2.0	
-# 	8.5”	4724m	7”	4700m	32	TN110HC		456 sx G at SG 1.89	TOL 4027m
-# 	6”	5356m	4.5”	5353m	12.5	P110		192 sx HTB at SG 1.94	TOL 4650.4m
+# 	12.25ï¿½	4106m	9 5/8ï¿½	4098.4m	53.5	P110	289	520 sx G at SG 2.0	
+# 	8.5ï¿½	4724m	7ï¿½	4700m	32	TN110HC		456 sx G at SG 1.89	TOL 4027m
+# 	6ï¿½	5356m	4.5ï¿½	5353m	12.5	P110		192 sx HTB at SG 1.94	TOL 4650.4m
 # #
 # TEMPERATURES:
 # 	Depth Driller	Logger	Temp	Log Type	Time since circ	Circ Time

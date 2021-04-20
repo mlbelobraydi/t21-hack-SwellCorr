@@ -9,14 +9,14 @@
  STEP.M             0.5000              :STEP
  NULL.             -999.25              :NULL VALUE
  COMP.    ConocoPhillips                :COMPANY
- WELL.    Kronos 1                      :WELL
+ WELL.    Kronos-1                      :WELL
  FLD .    Exploration                   :FIELD
  LOC .                                  :LOCATION
  PROV.                                  :PROVINCE
  SRVC.    Schlumberger                  :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    04/29/2010                    :LOG DATE
- UWI .    Kronos 1                      :UNIQUE WELL ID
+ UWI .    Kronos-1                      :UNIQUE WELL ID
  LATI.DEG -13/41/53.98                   : Latitude
  LONG.DEG 122/11/30.24                  : Longitude
  GDAT.                                  : Geodetic Datum
@@ -24,14 +24,14 @@
 ~CURVE INFORMATION
 #MNEM    .UNIT     API CODE             Curve Description
  DEPT    .M                             :   Along hole depth
- ECGR    .gAPI                          :   EDTC Corrected Gamma-Ray
+ GR    .gAPI                          :   EDTC Corrected Gamma-Ray
  RS      .ohm.m                         :   (RM)    (ARC[1])                (6in)                   Phase Shift Resistivity 22 inch Spacing at 2 MHz, Environmentally Corrected.
  RD      .ohm.m                         :   (RM)    (ARC[1])                (6in)                   Phase Shift Resistivity 40 inch Spacing at 2 MHz, Environmentally Corrected.
- TNPH    .pu                            :   (RM)    (ECO[1])                (6in)                   Thermal Neutron Porosity (Ratio Method) in Selected Lithology
+ NPHI    .pu                            :   (RM)    (ECO[1])                (6in)                   Thermal Neutron Porosity (Ratio Method) in Selected Lithology
  RHOB    .g/cm3                         :   (RM)    (ECO[1])                (6in)                   Bulk Density
  DCAV    .in                            :   (RM)    (ECO[1])                (6in)                   Density Caliper, Average
- DTCO    .US/F                          :   Delta-T Compressional
- DTSM    .US/F                          :   Delta-T Shear
+ DT      .US/F                          :   Delta-T Compressional
+ DTS     .US/F                          :   Delta-T Shear
 #
 # Curve              Start        Stop     Minimum     Maximum
 # ------------------------------------------------------------
@@ -62,15 +62,15 @@
 # HOLE AND CASING DATA:
 # 	Hole 	Hole	Casing	Casing 	Weight	Grade	Joints	Cement	TOC
 # 	Size	Depth	Size	Depth	lb/ft
-# 	36”	595m	30”	594m	310	X-52		829 sx G at SG 1.5
+# 	36ï¿½	595m	30ï¿½	594m	310	X-52		829 sx G at SG 1.5
 # 								807 sx G at SG 1.89
 # 								234 sx G at SG 1.89	Top up
-# 	17.5”	2663m	13 3/8”	2654.8m	72	P-110		684 sx G at SG 1.5
+# 	17.5ï¿½	2663m	13 3/8ï¿½	2654.8m	72	P-110		684 sx G at SG 1.5
 # 								487 sx G at SG 1.89
-# 	12.25”	4097m	9 5/8”	4089.5m	53.5	P-110		517 sx G at SG 1.98
-# 	8.5”	4778m	7”	4777m	32	TN-P110		227 sx G at SG 1.89
+# 	12.25ï¿½	4097m	9 5/8ï¿½	4089.5m	53.5	P-110		517 sx G at SG 1.98
+# 	8.5ï¿½	4778m	7ï¿½	4777m	32	TN-P110		227 sx G at SG 1.89
 # 								Liner hanger at 3989.3m
-# 	6”	5329m	4.5”	5329m	12.6	P-110		123 sx HTB at SG 1.94
+# 	6ï¿½	5329m	4.5ï¿½	5329m	12.6	P-110		123 sx HTB at SG 1.94
 # 								Liner hanger at 4728m
 # #
 # TEMPERATURES:

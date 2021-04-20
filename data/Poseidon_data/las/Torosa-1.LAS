@@ -9,14 +9,14 @@
  STEP.M             0.5000              :STEP
  NULL.             -999.25              :NULL VALUE
  COMP.    Woodside                      :COMPANY
- WELL.    Torosa 1                      :WELL
+ WELL.    Torosa-1                      :WELL
  FLD .    Exploration                   :FIELD
  LOC .                                  :LOCATION
  PROV.                                  :PROVINCE
  SRVC.    Sperry/Schlumberger /Occam    :SERVICE COMPANY
  CTRY.                                  :COUNTRY
  DATE.    15/12/2006 / 2009             :LOG DATE
- UWI .    Torosa 1                      :UNIQUE WELL ID
+ UWI .    Torosa-1                               :UNIQUE WELL ID
  LATI.DEG -13/52/02.03                   : Latitude
  LONG.DEG 122/04/09.59                  : Longitude
  GDAT.                                  : Geodetic Datum
@@ -27,10 +27,10 @@
  GR      .API                           :   Gamma Ray combined
  RS      .OHMM                          :   Shallow Resistivity composite curve
  RD      .OHMM                          :   Deep Resistivity composite curve
- RHOZ    .g/cm3                         :   Formation Density
- HTNP    .PU                            :   Thermal Neutron Porosity
+ RHOB    .g/cm3                         :   Formation Density
+ NPHI    .PU                            :   Thermal Neutron Porosity
  HDAR    .IN                            :   Hole Diameter from Area
- BATC    .USEC/F                        :   Compressional Sonic
+ DT    .USEC/F                        :   Compressional Sonic
  DTS     .US/FT                         :   Shear Slowness 1
 #
 # Curve              Start        Stop     Minimum     Maximum
@@ -63,9 +63,9 @@
 # HOLE AND CASING DATA:
 # 	Hole 	Hole	Casing	Casing 	Weight	Grade	Joints	Cement 	TOC
 # 	Size	Depth	Size	Depth	lb/ft
-# 	36”	557.5m	30”	555.8m	310	X-52	3	1342 sx G at SG 1.9 	Seafloor
-# 	12.25”	3533m	9 5/8”	3526.7m	47	L-80	242	325 sx HTB at SG 1.9	
-# 	8.5”	4685m
+# 	36ï¿½	557.5m	30ï¿½	555.8m	310	X-52	3	1342 sx G at SG 1.9 	Seafloor
+# 	12.25ï¿½	3533m	9 5/8ï¿½	3526.7m	47	L-80	242	325 sx HTB at SG 1.9	
+# 	8.5ï¿½	4685m
 # #
 # TEMPERATURES:	See also temperatures reported on MDT sampling
 # 	Logger's Depth	Temp	Log Type	Time since circ	Circ Time
