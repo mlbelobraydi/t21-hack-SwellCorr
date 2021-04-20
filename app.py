@@ -22,8 +22,8 @@ server = app.server
 
 # # load well data
 """Need to add a method for the user to point to the directory or add additional las files later"""
-#w = Well.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS"))) #original example
-p = Project.from_las(str(Path("well_picks/data/McMurray_data/las/*.LAS")))
+#w = Well.from_las(str(Path("data/las/PoseidonNorth1Decim.LAS"))) #original example
+p = Project.from_las(str(Path("data/McMurray_data/las/*.LAS")))
 well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selector tool
 
 df = p[0].df() ##gets data from the first well in the Welly Project
@@ -31,7 +31,7 @@ curve_list = df.columns.tolist() ##gets the column names for later use in the cu
 curve = curve_list[0] ##gets the first curve name to be used as the first curve displayed in the plotly figure
 
 ## Load well top data
-surface_picks_df = pd.read_table(Path('./well_picks/data/McMurray_data/PICKS.TXT'),
+surface_picks_df = pd.read_table(Path('./data/McMurray_data/PICKS.TXT'),
                                 usecols=['UWI', 'PICK', 'MD'])
 
 
@@ -220,7 +220,7 @@ def save_picks(n_clicks, surface_picks, path):
     #picks_df = pd.read_json(surface_picks)
 
     if path:
-        path_to_save = Path('.') / 'well_picks' / 'data' / 'updates' / path
+        path_to_save = Path('.') / 'data' / 'updates' / path
         with open(path_to_save, 'w') as f:
             json.dump(surface_picks, fp=f)
 
