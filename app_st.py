@@ -1,14 +1,18 @@
 import streamlit as st
-import pandas as pd
-from welly import Well, Project ##Welly is used to organize the well data and project collection
+from welly import Project
 from pathlib import Path
 import plotly.express as px
 import matplotlib.pyplot as plt
 from striplog import Striplog
-from os import path
 import helper
+from bokeh.models import ColumnDataSource, CustomJS
+from bokeh.plotting import figure
+import pandas as pd
+from streamlit_bokeh_events import streamlit_bokeh_events
+
 
 st.set_page_config(layout='wide')
+
 
 def get_tops_df(project, tops_field='tops', columns=['UWI', 'PICK', 'MD']):
     """
@@ -23,7 +27,8 @@ def get_tops_df(project, tops_field='tops', columns=['UWI', 'PICK', 'MD']):
             rows.append(row)
     df = pd.DataFrame(rows, columns=columns)
     return df
-    
+
+
 def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
     """
     This take a DataFram (df) for a well, and converts it into
@@ -35,6 +40,7 @@ def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
     for i, row in df.iterrows():
         csv_txt = csv_txt + str(row['MD']) + ', ' + row['PICK'] + '\n'
     return csv_txt
+
 
 def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs):
     """
@@ -64,6 +70,7 @@ def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs)
                                                                       alpha=0.75))
     return
 
+
 def section_plot(p, legend=None, ymin=3000, ymax=5500):
     fig = plt.figure(constrained_layout=True, figsize=(6, 10))
     axes_names = [name.replace(' ', '-') for name in p.uwis]
@@ -82,6 +89,7 @@ def section_plot(p, legend=None, ymin=3000, ymax=5500):
 
     #fig.savefig('cross_section.png')
     return fig
+
 
 def update_figure(picks, curve, active_well):
     """redraw the plot when the data in tops-storage is updated"""
@@ -105,49 +113,20 @@ def update_figure(picks, curve, active_well):
 
     return fig
 
-base_dir = "./well_picks/Poseidon_data"
+base_dir = "./data/Poseidon_data"
 
 # # load well data
 """Need to add a method for the user to point to the directory or add additional las files later"""
-#w = Well.from_las(str(Path("well_picks/data/las/PoseidonNorth1Decim.LAS"))) #original example
 fpath = Path(base_dir+"/las/*.LAS")
 p = Project.from_las(str(fpath))
-well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selector tool
-print(well_uwi)
-
-#curve = curve_list[0] ##gets the first curve name to be used as the first curve displayed in the plotly figure
- 
-# # Load well top data
-"""
-surface_picks_df = pd.read_table(Path(base_dir+"/PICKS.TXT'),
-                                usecols=['UWI', 'PICK', 'MD'])"""
+well_uwi = [w.uwi for w in p]
 
 for w in p:
     name = w.fname.split('/')[-1].split('.')[0]
     strip = Striplog.from_csv(base_dir+f'/tops/{name}.csv')
     w.data['tops'] = strip
 
-#master_tops_file = 'data/McMurray_data/PICKS.TXT'
-#df = pd.read_csv(master_tops_file, sep='\t')
-"""
-striplogs = {}
-for uwi, g in surface_picks_df.groupby('UWI'):
-    striplogs[uwi] = g[['MD', 'PICK']]
-    csv_txt = df_to_csvtxt(striplogs[uwi])
-    striplogs[uwi] = Striplog.from_csv(text=csv_txt)
-​
-for w in p:
-    name = w.fname.split('/')[-1].split('.')[0]
-    w.data['tops'] = striplogs[w.uwi]"""
 well_uwi = [w.uwi for w in p]
-
-#well dropdown selector
-#well_dropdown_options = [{'label': k, 'value': k} for k in sorted(well_uwi)] ##list of wells to the dropdown
-#tops dropdown options
-"""we need to have a stratigraphic column at some point"""
-#tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks_df['PICK'].unique())] ##list of tops to the dropdown
-##well log curve dropdown options
-
 well_uwi = st.sidebar.selectbox("Well Names", well_uwi)
 
 df = p[0].df() ##gets data from the first well in the Welly Project
@@ -178,17 +157,10 @@ fig_well_1 = update_figure(tops_storage, curve, well_uwi)
 
 with col1:
     st.plotly_chart(fig_well_1, use_container_width=True)
-#st.markdown("![Striplogs](cross_section.png)")
 
 with col2:
     st.pyplot(fig=fig)
 
-import streamlit as st
-from bokeh.models import ColumnDataSource, CustomJS
-from bokeh.plotting import figure
-import pandas as pd
-import numpy as np
-from streamlit_bokeh_events import streamlit_bokeh_events
 
 def data(df):
     df = pd.DataFrame({"x": df[curve], "y": df.index})
@@ -231,5 +203,6 @@ if event_result is not None:
         st.subheader("Selected Points' Pandas Stat summary")
         indices = event_result["TestSelectEvent"].get("indices", [])
         st.table(df.iloc[indices].describe())
+
 st.subheader("Raw Event Data")
 st.write(event_result)
