@@ -13,6 +13,7 @@ dependencies:
   - pip:
       - streamlit
       - plotly
+      - bokeh==2.2.0
       - welly
       - striplog
       - streamlit-bokeh-events
