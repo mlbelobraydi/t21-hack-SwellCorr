@@ -1,0 +1,19 @@
+name: wellcorr
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - pytest
+  - matplotlib
+  - numpy
+  - pandas
+  - dash
+  - bokeh
+  - pip:
+      - streamlit
+      - plotly
+      - welly
+      - striplog
+      - streamlit-bokeh-events
