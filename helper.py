@@ -1,4 +1,42 @@
 import numpy as np
+from plotly.subplots import make_subplots
+import plotly.graph_objs as go
+
+def make_log_plot(df, log_list=['GR','RD']):
+    '''
+    create a composite log of GR and Resistivity
+    '''
+    gammaray = go.Scatter(x=df['GR'].values.tolist(), y=df.index, name='Gamma Ray', line=dict(color='limegreen'))
+    resistivity = go.Scatter(x=df['RD'].values.tolist(), y=df.index, xaxis='x2', name='Resistivity')
+
+    data = [gammaray, resistivity]
+
+    layout = go.Layout(
+        xaxis=dict(
+            domain=[0, 0.45], 
+            range=[0,120],
+            position=1,
+            title="GR",
+            titlefont=dict(
+            color="limegreen"
+        ),
+        tickfont=dict(
+            color="limegreen")
+                        
+        ),
+        xaxis2=dict(
+            domain=[0.55, 1],
+            range=[-1,4],
+            type='log',
+            position=1,
+            title="Res"
+        ),
+        hovermode="y",
+        template='plotly_white'
+        )
+    fig = go.Figure(data=data, layout=layout)
+    fig.update_yaxes(autorange="reversed") #can i put this in with the layout
+    return fig
 
 def update_picks_on_plot(fig, surface_picks):
     """Draw horizontal lines on a figure at the depths of the values in the
