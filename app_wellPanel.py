@@ -1,11 +1,12 @@
 from welly import Well, Project # Welly is used to organize the well data and project collection
-from striplog import Legend, Striplog, StriplogError
+from striplog import Legend, Striplog
 import plotly.express as px # plotly is used as the main display functionality
 import matplotlib.pyplot as plt 
 
 from dash import Dash, callback_context # dash is used to update the plot and fields dynamically in a web browser
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
 
 import flask
@@ -165,9 +166,8 @@ well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selec
 # Striplog must have the same name as LAS file.
 # e.g. Torosa-1.LAS and Torosa-1.csv
 for w in p:
-    name = Path(w.fname).name.split('.')[0]
-    new_path = f'data/Poseidon_data/tops/{name}.csv'
-    print(name, new_path)
+    name = Path(w.fname).stem
+    print(name)
     strip = Striplog.from_csv(f'data/Poseidon_data/tops/{name}.csv')
     w.data['tops'] = strip
 
@@ -193,7 +193,7 @@ well = p[0]  ##gets data from the first well in the Welly Project
 curve_list = get_curves(p) ##gets the column names for later use in the curve-selector tool
 curve = get_first_curve(curve_list)
 ## Load well top data
-#surface_picks_df = pd.read_table(Path('./well_picks/data/McMurray_data/PICKS.TXT'),
+#surface_picks_df = pd.read_table(Path('./data/McMurray_data/PICKS.TXT'),
 #                                usecols=['UWI', 'PICK', 'MD'])
 surface_picks_df = get_tops_df(p)
 print(surface_picks_df.info())
@@ -251,27 +251,41 @@ app.layout = html.Div(children=[
                         style={'width': '200', 'height':'1000px'}), ##figure of log curve with well tops
 
             html.Div([
+                dash_table.DataTable(
+                    id='table',
+                    columns=[
+                        {"name": i, "id": i, "deletable": False, "selectable": False, "hideable": False}
+                        for i in surface_picks_df.columns
+                    ],
+                    data=surface_picks_df.to_dict('records'),
+                    editable=True,
+                    sort_action='native',
+                    sort_mode='multi',
+                    filter_action='native',
+                    style_table={'overflowY': 'scroll', 'height': 300},
+                    ),
+
                 # hidden_div for storing tops data as json
                 # Currently not hidden for debugging purposes. change style={'display': 'none'}
-                html.Div(id='tops-storage', children=surface_picks_df.to_json()),#, style={'display': 'none'}),
+                html.Div(id='tops-storage', children=surface_picks_df.to_json(), style={'display': 'none'}),
 
                 html.Hr(),
                 html.H4('Striplog CSV Text:'),
                 html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
                 #html.Img(id='corr-plot', src='data:image/png;base64,{}'.format(encoded_image)) #src='cross-section.png')
                 html.Img(id='cross-section', src=encode_xsection(p)) #src='cross-section.png')
-            ]),
+            ], style={'width': 800}),
             
             # hidden_div for storing un-needed output
-            html.Div(id='placeholder', style={'display': 'none'})
+            html.Div(id='placeholder', style={'display': 'none'}),
+            
         ],
-        style={'display': 'flex'}
+        style={'display': 'flex',}
     ),
     html.Div(
         html.P(children=['The swell way of correlating wells'])
     )
     ]
-)
 
 @app.callback(
     Output('cross-section', 'src'),
