@@ -188,7 +188,7 @@ def encode_xsection(p):
 # image_filename = 'cross_section.png' # replace with your own image 
 # encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
-
+df = p[0].df() #gets a dataframe from the first well to pass to the figure
 well = p[0]  ##gets data from the first well in the Welly Project
 curve_list = get_curves(p) ##gets the column names for later use in the curve-selector tool
 curve = get_first_curve(curve_list)
@@ -207,10 +207,8 @@ tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks_df
 curve_dropdown_options = [{'label': k, 'value': k} for k in sorted(curve_list)] ##list of well log curves to the dropdown
 
 # draw the initial plot
-fig_well_1 = px.line(x=well.data[curve], y=well.data[curve].basis, labels = {'x':curve, 'y': 'MD'}) ##polot data and axis lables
-fig_well_1.update_yaxes(autorange="reversed") ## flips the y-axis to increase down assuming depth increases
-fig_well_1.layout.xaxis.fixedrange = True ##forces the x axis to a fixed range based on the curve data
-fig_well_1.layout.template = 'plotly_white' ##template for the plotly figure
+#plotting only GR and RD in a subplot
+fig_well_1 = helper.make_log_plot(df)
 
 app.title = "SwellCorr"
 app.layout = html.Div(children=[
@@ -373,17 +371,13 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
 def update_figure(picks, curve, active_well):
     """redraw the plot when the data in tops-storage is updated"""  
     w = p.get_well(active_well) ##selects the correct welly.Well object
-    
+    df = w.df() ##reloads the correct dataframe for the display
     picks_df = pd.read_json(picks)
     picks_selected = picks_df[picks_df['UWI'] == active_well.replace(' ', '-')]
     
     # regenerate figure with the new horizontal line
-    fig = px.line(x=w.data[curve], y=w.data[curve].basis, labels = {'x':curve, 'y': 'MD'})
+    fig = helper.make_log_plot(df)
 
-    fig.layout = {'uirevision': curve} # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
-    fig.update_yaxes(autorange="reversed")
-    fig.layout.xaxis.fixedrange = True
-    fig.layout.template = 'plotly_white'
     helper.update_picks_on_plot(fig, picks_selected)
     
     return fig
