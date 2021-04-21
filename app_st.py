@@ -122,7 +122,7 @@ p = Project.from_las(str(fpath))
 well_uwi = [w.uwi for w in p]
 
 for w in p:
-    name = w.fname.split('/')[-1].split('.')[0]
+    name = Path(w.fname).stem
     strip = Striplog.from_csv(base_dir+f'/tops/{name}.csv')
     w.data['tops'] = strip
 
