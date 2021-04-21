@@ -1,40 +1,202 @@
-from welly import Well, Project ##Welly is used to organize the well data and project collection
+from welly import Well, Project # Welly is used to organize the well data and project collection
+from striplog import Legend, Striplog
+import plotly.express as px # plotly is used as the main display functionality
+import matplotlib.pyplot as plt 
 
-import plotly.express as px ##plotly is used as the main display functionality
-from dash import Dash, callback_context ##dash is used to update the plot and fields dynamically in a web browser
+from dash import Dash, callback_context # dash is used to update the plot and fields dynamically in a web browser
 import dash_core_components as dcc
 import dash_html_components as html
-import flask
+import dash_table
 from dash.dependencies import Input, Output, State
+
+import flask
+from glob import glob
 
 import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
 import numpy as np
+import base64
+import os
 
 import helper
+
+
+def get_curves(p):
+    """
+    Gets a list of curves from the wells in the project
+    """
+    curve_list = []
+    for well in p:
+        curves = well.data.keys()
+        for c in curves:
+            curve_list.append(c)
+    return sorted(set(curve_list))
+
+
+def get_tops_df(project, tops_field='tops', columns=['UWI', 'PICK', 'MD']):
+    """
+    Returns a DataFrame of tops from a welly Project
+    """
+    tops_set = []
+    rows = []
+    for well in project:
+        for t in well.data[tops_field]:
+            row = [well.uwi, t.components[0]['formation'], t.top.middle]
+            tops_set.append(t.components[0]['formation'])
+            rows.append(row)
+    df = pd.DataFrame(rows, columns=columns)
+    return df
+
+
+def make_well_project(laspath='data/las/', stripath='data/tops/'):
+    """
+    Return a dictionary of wells and striplogs where the
+    key is the base filename
+    """
+    wells = {}
+    lasfiles = glob(laspath + '*.LAS')
+    stripfiles = glob(stripath + '*.csv')
+    for fname, sname in zip(lasfiles, stripfiles):
+        name = fname.split('/')[-1].split('.')[0]
+        wells[name] = Well.from_las(fname)
+        wells[name].data['tops'] = Striplog.from_csv(sname)
+        proj = Project(list(wells.values()))
+    return proj
+
+
+def section_plot(p, legend=None, ymin=3000, ymax=5500):
+    fig = plt.figure(constrained_layout=True, figsize=(6,10))
+    axes_names = [name.replace(' ','-') for name in p.uwis]
+    ax_dict = fig.subplot_mosaic([axes_names])
+    for i, w in enumerate(p):
+        name = w.uwi.replace(' ','-')
+        w.data['tops'].plot(ax=ax_dict[w.uwi.replace(' ','-')], legend=legend, alpha=0.5)
+        plot_tops(ax_dict[name], w.data['tops'], field='formation', ymin=ymin, ymax=ymax)
+        ax_dict[name].plot(w.data['GR']/120, w.data['GR'].basis, c='k', lw=0.5)
+        ax_dict[name].set_xlim(0,175/120)
+        ax_dict[name].set_ylim(ymax, ymin)
+        ax_dict[name].set_title(name)
+        if i != 0:
+            ax_dict[name].set_yticklabels([])
+
+    fig.savefig('cross_section.png')
+    return 
+
+
+def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs):
+    """
+    Plotting, but only for tops (as opposed to intervals).
+    """
+    if field is None:
+        raise StriplogError('You must provide a field to plot.')
+
+    ys = [iv.top.z for iv in striplog]
+
+    try:
+        try:
+            ts = [getattr(iv.primary, field) for iv in striplog]
+        except:
+            ts = [iv.data.get(field) for iv in striplog]
+    except:
+        print('Could not find field')
+        #raise StriplogError('Could not retrieve field.')
+
+    for y, t in zip(ys, ts):
+        if (y > ymin) and (y < ymax):
+            ax.axhline(y, color='lightblue', lw=3, zorder=0)
+            ax.text(0.1, y,#-max(ys)/200, 
+                    t, fontsize=10, ha='left', va='center', bbox=dict(facecolor='white', 
+                                                         edgecolor='grey', 
+                                                         boxstyle='round',
+                                                         alpha=0.75))
+    return
+
+
+def get_first_curve(curve_list):
+    if 'GR' in curve_list:
+        curve = 'GR'
+    else:
+        curve = curve_list[0] ## gets the first curve name for the plotly figure
+    return curve
+
+
+def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
+    """
+    This take a DataFram (df) for a well, and converts it into
+    as csv-like string to make a Striplog
+    """ 
+    header = 'top, Comp formation\n'
+    csv_txt = ''
+    csv_txt += csv_txt + header
+    for i, row in df.iterrows():
+        csv_txt = csv_txt + str(row['MD']) + ', ' + row['PICK'] + '\n'
+    return csv_txt
 
 
 app = Dash(__name__)
 # Create server variable with Flask server object for use with gunicorn
 server = app.server
 
-# # load well data
-"""Need to add a method for the user to point to the directory or add additional las files later"""
-#w = Well.from_las(str(Path("data/las/PoseidonNorth1Decim.LAS"))) #original example
-p = Project.from_las(str(Path("data/McMurray_data/las/*.LAS")))
+
+# Get las files
+path = 'data/Poseidon_data/las/'
+print('\n LAS PATH:', path, '\n')
+lasfiles = glob(path + '*.LAS')
+for fname in lasfiles:
+    print(' '*5, fname)
+print('\n')
+
+
+# Get striplog files
+path2 = 'data/Poseidon_data/tops/'
+print('\n STRIP PATH:', path2, '\n')
+stripfiles = glob(path2 + '*.csv')
+for fname in stripfiles:
+    print(' '*5, fname)
+print('\n')
+
+tops_legend = Legend.from_csv(filename='data/Poseidon_data/tops_legend.csv')
+
+p = Project.from_las('data/Poseidon_data/las/*.LAS')
 well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selector tool
 
-df = p[0].df() ##gets data from the first well in the Welly Project
-curve_list = df.columns.tolist() ##gets the column names for later use in the curve-selector tool
-curve = curve_list[0] ##gets the first curve name to be used as the first curve displayed in the plotly figure
+# Add striplogs to Project
+# Striplog must have the same name as LAS file.
+# e.g. Torosa-1.LAS and Torosa-1.csv
+for w in p:
+    name = Path(w.fname).stem
+    print(name)
+    strip = Striplog.from_csv(f'data/Poseidon_data/tops/{name}.csv')
+    w.data['tops'] = strip
 
+
+# Make the well correlation panel
+def encode_xsection(p):
+    """
+    Takes the project and saves a xsec PNG a disk and encodes it for dash
+    """
+    section_plot(p, tops_legend)
+    image_filename = 'cross_section.png' # replace with your own image 
+    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+    return 'data:image/png;base64,{}'.format(encoded_image.decode())
+
+
+# Initialize Cross-section
+# section_plot(p) # , tops_legend)
+# image_filename = 'cross_section.png' # replace with your own image 
+# encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+
+df = p[0].df() #gets a dataframe from the first well to pass to the figure
+well = p[0]  ##gets data from the first well in the Welly Project
+curve_list = get_curves(p) ##gets the column names for later use in the curve-selector tool
+curve = get_first_curve(curve_list)
 ## Load well top data
-surface_picks_df = pd.read_table(Path('./data/McMurray_data/PICKS.TXT'),
-                                usecols=['UWI', 'PICK', 'MD'])
-
-
+#surface_picks_df = pd.read_table(Path('./data/McMurray_data/PICKS.TXT'),
+#                                usecols=['UWI', 'PICK', 'MD'])
+surface_picks_df = get_tops_df(p)
+print(surface_picks_df.info())
 
 #well dropdown selector
 well_dropdown_options = [{'label': k, 'value': k} for k in sorted(well_uwi)] ##list of wells to the dropdown
@@ -45,10 +207,8 @@ tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks_df
 curve_dropdown_options = [{'label': k, 'value': k} for k in sorted(curve_list)] ##list of well log curves to the dropdown
 
 # draw the initial plot
-fig_well_1 = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name}) ##polot data and axis lables
-fig_well_1.update_yaxes(autorange="reversed") ## flips the y-axis to increase down assuming depth increases
-fig_well_1.layout.xaxis.fixedrange = True ##forces the x axis to a fixed range based on the curve data
-fig_well_1.layout.template = 'plotly_white' ##template for the plotly figure
+#plotting only GR and RD in a subplot
+fig_well_1 = helper.make_log_plot(df)
 
 app.title = "SwellCorr"
 app.layout = html.Div(children=[
@@ -61,7 +221,7 @@ app.layout = html.Div(children=[
         children=[
             html.Div([
                 'Select well:', ##Well selector
-                dcc.Dropdown(id='well-selector', options=well_dropdown_options, value=well_uwi[0], style={'width': '200px'}),
+                dcc.Dropdown(id='well-selector', options=well_dropdown_options, value=p[0].uwi, style={'width': '200px'}),
 
                 'Edit tops:', ##existing top to edit selector
                 dcc.Dropdown(id='top-selector', options=tops_dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
@@ -89,20 +249,36 @@ app.layout = html.Div(children=[
                         style={'width': '200', 'height':'1000px'}), ##figure of log curve with well tops
 
             html.Div([
+                dash_table.DataTable(
+                    id='table',
+                    columns=[
+                        {"name": i, "id": i, "deletable": False, "selectable": False, "hideable": False}
+                        for i in surface_picks_df.columns
+                    ],
+                    data=surface_picks_df.to_dict('records'),
+                    editable=True,
+                    sort_action='native',
+                    sort_mode='multi',
+                    filter_action='native',
+                    style_table={'overflowY': 'scroll', 'height': 300},
+                    ),
+
                 # hidden_div for storing tops data as json
                 # Currently not hidden for debugging purposes. change style={'display': 'none'}
-                html.Div(id='tops-storage', children=surface_picks_df.to_json()),#, style={'display': 'none'}),
+                html.Div(id='tops-storage', children=surface_picks_df.to_json(), style={'display': 'none'}),
 
                 html.Hr(),
                 html.H4('Striplog CSV Text:'),
                 html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
-                html.Img(id='corr-plot', src='https://images.squarespace-cdn.com/content/58a4b31dbebafb6777c575b4/1549829488328-IZMTRHP7SLI9P9Z7MUSW/website_logo_head.png?content-type=image%2Fpng')
-            ]),
+                #html.Img(id='corr-plot', src='data:image/png;base64,{}'.format(encoded_image)) #src='cross-section.png')
+                html.Img(id='cross-section', src=encode_xsection(p)) #src='cross-section.png')
+            ], style={'width': 800}),
             
             # hidden_div for storing un-needed output
-            html.Div(id='placeholder', style={'display': 'none'})
+            html.Div(id='placeholder', style={'display': 'none'}),
+            
         ],
-        style={'display': 'flex'}
+        style={'display': 'flex',}
     ),
     html.Div(
         html.P(children=['The swell way of correlating wells'])
@@ -110,19 +286,35 @@ app.layout = html.Div(children=[
     ]
 )
 
-# update curve dropdown options when new well is picked
-"""update of new curve selector list when new well is triggered"""
+@app.callback(
+    Output('cross-section', 'src'),
+    [Input('tops-storage', 'children')],
+    [State('well-selector', 'value')])
+def update_cross_section(tops_storage, well_uwi):
+    """
+    top_storage_json to striplogs to project. 
+    to return encoded str (image)
+    """
+    wells_tops = pd.read_json(tops_storage)
+    well_tops = wells_tops[wells_tops.UWI == well_uwi]
+    csv_txt = df_to_csvtxt(well_tops)
+    p.get_well(well_uwi).data['tops'] = Striplog.from_csv(text=csv_txt)
+    return encode_xsection(p)
+
+
 @app.callback(
     [Output('curve-selector', 'options'),
      Output('curve-selector', 'value')],
     [Input('well-selector', 'value')])
-def well_update_changes_curves(well_uwi): ##def for updating curve list and curves
-    w = p.get_well(well_uwi) ## identifies and gets the correct welly.Well object based on well_uwi
-    df = w.df() ## creates dataframe from welly.Well object
-    curve_list = sorted(df.columns.tolist()) ##gets curve list for welly.Well object
-    curve = curve_list[0] ##identifies the first curve in list for default figure
-    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list] ##creates dropdown list
-    return curve_dropdown_options, curve ##returns the dropdown list options and the initial curve
+def well_update_changes_curves(well_uwi):  
+    """
+    def for updating curve list and curves
+    """
+    w = p.get_well(well_uwi)  # identifies and gets the correct welly.Well object based on well_uwi
+    curve_list = sorted(list(w.data))
+    curve = get_first_curve(curve_list)
+    curve_dropdown_options = [{'label': k, 'value': k} for k in curve_list]  #creates dropdown list
+    return curve_dropdown_options, curve  # returns the dropdown list options and the initial curve
 
 
 # update tops data when graph is clicked or new top is added
@@ -176,22 +368,17 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
      Input('curve-selector', 'value')],
      [State('well-selector', 'value')] ## With multiple wells the state of the well_uwi must be passed to select the right welly.Well
     )
-def update_figure(surface_picks, curve, active_well):
+def update_figure(picks, curve, active_well):
     """redraw the plot when the data in tops-storage is updated"""  
-    surface_picks = pd.read_json(surface_picks)
-    surface_picks = surface_picks[surface_picks['UWI'] == active_well]
-
     w = p.get_well(active_well) ##selects the correct welly.Well object
     df = w.df() ##reloads the correct dataframe for the display
-
+    picks_df = pd.read_json(picks)
+    picks_selected = picks_df[picks_df['UWI'] == active_well.replace(' ', '-')]
+    
     # regenerate figure with the new horizontal line
-    fig = px.line(x=df[curve], y=df.index, labels = {'x':curve, 'y': df.index.name})
+    fig = helper.make_log_plot(df)
 
-    fig.layout = {'uirevision': curve} # https://community.plotly.com/t/preserving-ui-state-like-zoom-in-dcc-graph-with-uirevision-with-dash/15793
-    fig.update_yaxes(autorange="reversed")
-    fig.layout.xaxis.fixedrange = True
-    fig.layout.template = 'plotly_white'
-    helper.update_picks_on_plot(fig, surface_picks)
+    helper.update_picks_on_plot(fig, picks_selected)
     
     return fig
 
@@ -202,7 +389,6 @@ def update_figure(surface_picks, curve, active_well):
     [Input('tops-storage', 'children')])
 def update_dropdown_options(surface_picks):
     """update the options available in the dropdown when a new top is added"""
-    
     surface_picks = pd.read_json(surface_picks)
     tops_dropdown_options = [{'label': k, 'value': k} for k in list(surface_picks['PICK'].unique())]
     return tops_dropdown_options
@@ -215,8 +401,10 @@ def update_dropdown_options(surface_picks):
     [State('tops-storage', 'children'),
     State('input-save-path', 'value')])
 def save_picks(n_clicks, surface_picks, path):
-    """Save out picks to a json file. 
-    TODO: I am sure there are better ways to handle saving out picks, but this is proof of concept"""
+    """
+    Save out picks to a json file. 
+    TODO: I am sure there are better ways to handle saving out picks, but this is proof of concept
+    """
     #picks_df = pd.read_json(surface_picks)
 
     if path:
