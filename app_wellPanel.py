@@ -286,6 +286,7 @@ app.layout = html.Div(children=[
         html.P(children=['The swell way of correlating wells'])
     )
     ]
+)
 
 @app.callback(
     Output('cross-section', 'src'),
@@ -413,7 +414,7 @@ def save_picks(n_clicks, surface_picks, path):
     #picks_df = pd.read_json(surface_picks)
 
     if path:
-        path_to_save = Path('.') / 'well_picks' / 'data' / 'updates' / path
+        path_to_save = Path('.') / 'data' / 'updates' / path
         with open(path_to_save, 'w') as f:
             json.dump(surface_picks, fp=f)
 
