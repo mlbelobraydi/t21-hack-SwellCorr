@@ -108,7 +108,7 @@ def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs)
         if (y > ymin) and (y < ymax):
             ax.axhline(y, color='lightblue', lw=3, zorder=0)
             ax.text(0.1, y,#-max(ys)/200, 
-                    t, fontsize=10, ha='left', va='center', bbox=dict(facecolor='white', 
+                    t, fontsize=6, ha='left', va='center', bbox=dict(facecolor='white', 
                                                          edgecolor='grey', 
                                                          boxstyle='round',
                                                          alpha=0.75))
