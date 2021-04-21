@@ -2,47 +2,62 @@ import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 
-def make_log_plot(df, log_list=['GR','RD']):
+
+def make_log_plot(w, log_list=['GR','DT'], 
+                  ymin=None, ymax=None, 
+                  resample=None): # curve names need to be dynamic later
     '''
     create a composite log of GR and Resistivity
+    TO DO:
+    - need to pass the curve names and colors
+    - colors should be dynamic
+    - linear vs. log should be dynamic
     '''
-    gammaray = go.Scatter(x=df['GR'].values.tolist(), y=df.index, name='Gamma Ray', line=dict(color='limegreen'))
-    resistivity = go.Scatter(x=df['RD'].values.tolist(), y=df.index, xaxis='x2', name='Resistivity')
+    #resample @ None # resample curves to higher resolution
+    if ymin is None:
+        ymin = w.data[log_list[0]].basis[0]
+    if ymax is None:
+        ymax = w.data[log_list[0]].basis[-1]
+    
+    track1 = go.Scatter(x=w.data[log_list[0]].values, y=w.data[log_list[0]].basis, name=log_list[0], line=dict(color='black'))
+    track2 = go.Scatter(x=w.data[log_list[1]].values, y=w.data[log_list[1]].basis, name=log_list[1], line=dict(color='red'),
+                        xaxis='x2')
 
-    data = [gammaray, resistivity]
+    data = [track1, track2]
 
     layout = go.Layout(
         xaxis=dict(
             domain=[0, 0.45], 
-            range=[0,120],
+            range=[0,150], # need to be range values later
+            #type='linear', # change to variable later
             position=1,
-            title="GR",
+            title=log_list[0],
             titlefont=dict(
-            color="limegreen"
+            color="black" # change to variable later
         ),
         tickfont=dict(
-            color="limegreen")
+            color="black") #change to variable later
                         
         ),
         xaxis2=dict(
             domain=[0.55, 1],
-            range=[-1,4],
-            type='log',
+            range=[140,40],
+            type='linear', # change to variable later
             position=1,
-            title="Res"
+            title=log_list[1]
         ),
         hovermode="y",
         template='plotly_white'
         )
     fig = go.Figure(data=data, layout=layout)
-    fig.update_yaxes(autorange="reversed") #can i put this in with the layout
+    fig.update_yaxes(range=(ymax,ymin)) # reversed for MD assumption
+
     return fig
+
 
 def update_picks_on_plot(fig, surface_picks):
     """Draw horizontal lines on a figure at the depths of the values in the
        surface picks dictionary"""
-
-    print(surface_picks)
 
     fig.update_layout(
         shapes=[

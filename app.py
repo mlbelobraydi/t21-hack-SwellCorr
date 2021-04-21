@@ -143,20 +143,12 @@ server = app.server
 
 # Get las files
 path = 'data/Poseidon_data/las/' # direct link to specific data
-# print('\n LAS PATH:', path, '\n') # for debugging
 lasfiles = glob(path + '*.LAS')
-# for fname in lasfiles: # for debugging
-#     print(' '*5, fname) # for debugging
-# print('\n') # for debugging
 
 
 # Get striplog files
 path2 = 'data/Poseidon_data/tops/' # direct link to specific data
-# print('\n STRIP PATH:', path2, '\n') # for debugging
 stripfiles = glob(path2 + '*.csv')
-# for fname in stripfiles: # for debugging
-#     print(' '*5, fname) # for debugging
-# print('\n') # for debugging
 
 tops_legend = Legend.from_csv(filename='data/Poseidon_data/tops_legend.csv') # direct link to specific data
 
@@ -168,7 +160,6 @@ well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selec
 # e.g. Torosa-1.LAS and Torosa-1.csv
 for w in p:
     name = Path(w.fname).stem
-    print(name)
     strip = Striplog.from_csv(f'data/Poseidon_data/tops/{name}.csv')  # direct link to specific data
     w.data['tops'] = strip
 
@@ -189,7 +180,7 @@ def encode_xsection(p):
 # image_filename = 'cross_section.png' # replace with your own image 
 # encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
-df = p[0].df() #gets a dataframe from the first well to pass to the figure
+#df = p[0].df() #gets a dataframe from the first well to pass to the figure
 well = p[0]  ##gets data from the first well in the Welly Project
 curve_list = get_curves(p) ##gets the column names for later use in the curve-selector tool
 curve = get_first_curve(curve_list)
@@ -197,7 +188,6 @@ curve = get_first_curve(curve_list)
 #surface_picks_df = pd.read_table(Path('./data/McMurray_data/PICKS.TXT'),
 #                                usecols=['UWI', 'PICK', 'MD'])
 surface_picks_df = get_tops_df(p)
-print(surface_picks_df.info())
 
 #well dropdown selector
 well_dropdown_options = [{'label': k, 'value': k} for k in sorted(well_uwi)] ##list of wells to the dropdown
@@ -209,7 +199,8 @@ curve_dropdown_options = [{'label': k, 'value': k} for k in sorted(curve_list)] 
 
 # draw the initial plot
 #plotting only GR and RD in a subplot
-fig_well_1 = helper.make_log_plot(df)
+ymin = 3000 # make dynamic later
+fig_well_1 = helper.make_log_plot(w=well, ymin=ymin)
 
 app.title = "SwellCorr"
 app.layout = html.Div(children=[
@@ -247,7 +238,7 @@ app.layout = html.Div(children=[
             ]),
             dcc.Graph(id="well_plot", 
                         figure=fig_well_1,
-                        style={'width': '200', 'height':'1000px'}), ##figure of log curve with well tops
+                        style={'width': '75', 'height':'800px'}), ##figure of log curve with well tops
 
             html.Div([
                 dash_table.DataTable(
@@ -273,7 +264,7 @@ app.layout = html.Div(children=[
                 html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
                 #html.Img(id='corr-plot', src='data:image/png;base64,{}'.format(encoded_image)) #src='cross-section.png')
                 html.Img(id='cross-section', src=encode_xsection(p)) #src='cross-section.png')
-            ], style={'width': 800}),
+            ] , style={'width': 800}),
             
             # hidden_div for storing un-needed output
             html.Div(id='placeholder', style={'display': 'none'}),
@@ -372,12 +363,11 @@ def update_pick_storage(clickData, new_top_n_clicks, active_pick, surface_picks,
 def update_figure(picks, curve, active_well):
     """redraw the plot when the data in tops-storage is updated"""  
     w = p.get_well(active_well) ##selects the correct welly.Well object
-    df = w.df() ##reloads the correct dataframe for the display
     picks_df = pd.read_json(picks)
     picks_selected = picks_df[picks_df['UWI'] == active_well.replace(' ', '-')]
     
     # regenerate figure with the new horizontal line
-    fig = helper.make_log_plot(df)
+    fig = helper.make_log_plot(w=w, ymin=ymin)
 
     helper.update_picks_on_plot(fig, picks_selected)
     
@@ -422,7 +412,6 @@ def save_picks(n_clicks, surface_picks, path):
     Input('well-selector', 'value')],
     [State('tops-storage', 'children')])
 def generate_striplog(n_clicks, active_well, surface_picks):
-    print(active_well)
     surface_picks = pd.read_json(surface_picks)
     surface_picks = surface_picks[surface_picks['UWI'] == active_well]   
     s = helper.surface_pick_to_striplog(surface_picks)
