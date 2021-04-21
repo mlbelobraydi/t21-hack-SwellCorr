@@ -16,7 +16,6 @@ import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import numpy as np
 import base64
 import os
 
@@ -54,12 +53,14 @@ def make_well_project(laspath='data/las/', stripath='data/tops/'):
     """
     Return a dictionary of wells and striplogs where the
     key is the base filename
+
+    This assumes that the las file and tops files have the same name
     """
     wells = {}
     lasfiles = glob(laspath + '*.LAS')
     stripfiles = glob(stripath + '*.csv')
     for fname, sname in zip(lasfiles, stripfiles):
-        name = fname.split('/')[-1].split('.')[0]
+        name = Path(fname).stem
         wells[name] = Well.from_las(fname)
         wells[name].data['tops'] = Striplog.from_csv(sname)
         proj = Project(list(wells.values()))
@@ -141,25 +142,25 @@ server = app.server
 
 
 # Get las files
-path = 'data/Poseidon_data/las/'
-print('\n LAS PATH:', path, '\n')
+path = 'data/Poseidon_data/las/' # direct link to specific data
+# print('\n LAS PATH:', path, '\n') # for debugging
 lasfiles = glob(path + '*.LAS')
-for fname in lasfiles:
-    print(' '*5, fname)
-print('\n')
+# for fname in lasfiles: # for debugging
+#     print(' '*5, fname) # for debugging
+# print('\n') # for debugging
 
 
 # Get striplog files
-path2 = 'data/Poseidon_data/tops/'
-print('\n STRIP PATH:', path2, '\n')
+path2 = 'data/Poseidon_data/tops/' # direct link to specific data
+# print('\n STRIP PATH:', path2, '\n') # for debugging
 stripfiles = glob(path2 + '*.csv')
-for fname in stripfiles:
-    print(' '*5, fname)
-print('\n')
+# for fname in stripfiles: # for debugging
+#     print(' '*5, fname) # for debugging
+# print('\n') # for debugging
 
-tops_legend = Legend.from_csv(filename='data/Poseidon_data/tops_legend.csv')
+tops_legend = Legend.from_csv(filename='data/Poseidon_data/tops_legend.csv') # direct link to specific data
 
-p = Project.from_las('data/Poseidon_data/las/*.LAS')
+p = Project.from_las('data/Poseidon_data/las/*.LAS') # direct link to specific data
 well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selector tool
 
 # Add striplogs to Project
@@ -168,7 +169,7 @@ well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selec
 for w in p:
     name = Path(w.fname).stem
     print(name)
-    strip = Striplog.from_csv(f'data/Poseidon_data/tops/{name}.csv')
+    strip = Striplog.from_csv(f'data/Poseidon_data/tops/{name}.csv')  # direct link to specific data
     w.data['tops'] = strip
 
 
