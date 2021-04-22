@@ -186,7 +186,7 @@ def rot_title(title, max_title_len=10):
     return rotate
 
 
-def encode_xsection(p, legend, savefig=False):
+def encode_xsection(p, legend, savefig=True):
     """
     Takes the project and saves a xsec PNG a disk and encodes it for dash
     """
