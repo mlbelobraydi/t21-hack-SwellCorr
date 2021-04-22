@@ -373,7 +373,7 @@ def update_cross_section(tops_storage, well_uwi):
     well_tops = wells_tops[wells_tops.UWI == well_uwi]
     csv_txt = df_to_csvtxt(well_tops)
     p.get_well(well_uwi).data['tops'] = Striplog.from_csv(text=csv_txt)
-    return encode_xsection(p)
+    return encode_xsection(p, legend)
 
 
 @app.callback(
