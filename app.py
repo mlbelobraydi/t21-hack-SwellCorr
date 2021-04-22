@@ -233,14 +233,18 @@ app.layout = html.Div(children=[
                 html.Button('Save Tops', id='save-button', n_clicks=0),
 
                 html.Hr(), ##button to update the Striplog dict on the page
-                html.Button('Update Striplog', id='gen-striplog-button')
+                html.Button('Update Striplog', id='gen-striplog-button'),
+                html.H4('Striplog CSV Text:'),
+                html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap', 'color': 'lightgray'})
 
             ]),
+
             dcc.Graph(id="well_plot", 
                         figure=fig_well_1,
-                        style={'width': '75', 'height':'800px'}), ##figure of log curve with well tops
+                        style={'width': '75', 'height':'1200px'}), ##figure of log curve with well tops
 
-            html.Div([
+            html.Div([  
+
                 dash_table.DataTable(
                     id='table',
                     columns=[
@@ -255,16 +259,16 @@ app.layout = html.Div(children=[
                     style_table={'overflowY': 'scroll', 'height': 300},
                     ),
 
+                html.Hr(),               
+                #html.Img(id='corr-plot', src='data:image/png;base64,{}'.format(encoded_image)) #src='cross-section.png')
+                html.Img(id='cross-section', src=encode_xsection(p)), #src='cross-section.png')
+                
+
                 # hidden_div for storing tops data as json
                 # Currently not hidden for debugging purposes. change style={'display': 'none'}
-                html.Div(id='tops-storage', children=surface_picks_df.to_json(), style={'display': 'none'}),
-
-                html.Hr(),
-                html.H4('Striplog CSV Text:'),
-                html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
-                #html.Img(id='corr-plot', src='data:image/png;base64,{}'.format(encoded_image)) #src='cross-section.png')
-                html.Img(id='cross-section', src=encode_xsection(p)) #src='cross-section.png')
-            ] , style={'width': 800}),
+                html.Div(id='tops-storage', children=surface_picks_df.to_json(), style={'display': 'none'})
+          
+           ] , style={'width': 800}),
             
             # hidden_div for storing un-needed output
             html.Div(id='placeholder', style={'display': 'none'}),

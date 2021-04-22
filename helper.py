@@ -1,6 +1,7 @@
 import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
+from welly import Well,Curve
 
 
 def make_log_plot(w, log_list=['GR','DT'], 
@@ -14,11 +15,19 @@ def make_log_plot(w, log_list=['GR','DT'],
     - linear vs. log should be dynamic
     '''
     #resample @ None # resample curves to higher resolution
-    if ymin is None:
-        ymin = w.data[log_list[0]].basis[0]
-    if ymax is None:
-        ymax = w.data[log_list[0]].basis[-1]
     
+    w_ymin = w.data[log_list[0]].basis[0]
+    w_ymax = w.data[log_list[0]].basis[-1]
+
+    w.Curve.to_basis
+    
+    if ymin is None:
+        ymin = well_ymin
+    if ymax is None:
+        ymax = well_ymax
+    
+
+
     track1 = go.Scatter(x=w.data[log_list[0]].values, y=w.data[log_list[0]].basis, name=log_list[0], line=dict(color='black'))
     track2 = go.Scatter(x=w.data[log_list[1]].values, y=w.data[log_list[1]].basis, name=log_list[1], line=dict(color='red'),
                         xaxis='x2')
@@ -51,6 +60,7 @@ def make_log_plot(w, log_list=['GR','DT'],
         )
     fig = go.Figure(data=data, layout=layout)
     fig.update_yaxes(range=(ymax,ymin)) # reversed for MD assumption
+    fig.layout.xaxis.fixedrange = True
 
     return fig
 
