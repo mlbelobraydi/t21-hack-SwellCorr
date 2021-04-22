@@ -35,31 +35,34 @@ def make_log_plot(w, log_list=['GR','DT'],
 
     layout = go.Layout(
         xaxis=dict(
-            domain=[0, 0.45], 
+            domain=[0, 0.45], #to keep some gap between tracks. try padding the margins instead
             range=[0,150], # need to be range values later
             #type='linear', # change to variable later
             position=1,
-            title=log_list[0],
+            title=log_list[0], #this is the axis title, need to figure out how to turn on the subplot title
             titlefont=dict(
-            color="black" # change to variable later
-        ),
-        tickfont=dict(
+            color="black"), # change to variable later
+            tickfont=dict(
             color="black") #change to variable later
-                        
-        ),
+            ),
         xaxis2=dict(
             domain=[0.55, 1],
             range=[140,40],
             type='linear', # change to variable later
             position=1,
-            title=log_list[1]
-        ),
+            title=log_list[1] 
+            ),
+        yaxis=dict(
+            domain=[0,0.95] #controlling the top of the plot so the name and scale are visible
+            ),
         hovermode="y",
-        template='plotly_white'#,
+        template='plotly_white',
+        
         )
     fig = go.Figure(data=data, layout=layout, layout_title_text=w.name)
     fig.update_yaxes(range=(ymax,ymin)) # reversed for MD assumption
     fig.layout.xaxis.fixedrange = True
+    fig.layout.xaxis2.fixedrange = True #added this line also to control zoom on the second track
    
 
     return fig
