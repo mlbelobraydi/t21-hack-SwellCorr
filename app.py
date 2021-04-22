@@ -1,5 +1,7 @@
 from welly import Well, Project # Welly is used to organize the well data and project collection
 from striplog import Legend, Striplog
+import matplotlib.pyplot as plt
+from matplotlib import ticker
 import plotly.express as px # plotly is used as the main display functionality
 import matplotlib.pyplot as plt 
 
@@ -35,6 +37,19 @@ def get_curves(p):
     return sorted(set(curve_list))
 
 
+def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
+    """
+    This take a DataFram (df) for a well, and converts it into
+    as csv-like string to make a Striplog
+    """ 
+    header = 'top, Comp formation\n'
+    csv_txt = ''
+    csv_txt += csv_txt + header
+    for i, row in df.iterrows():
+        csv_txt = csv_txt + str(row['MD']) + ', ' + row['PICK'] + '\n'
+    return csv_txt
+
+
 def get_tops_df(project, tops_field='tops', columns=['UWI', 'PICK', 'MD']):
     """
     Returns a DataFrame of tops from a welly Project
@@ -68,53 +83,61 @@ def make_well_project(laspath='data/las/', stripath='data/tops/'):
     return proj
 
 
-def section_plot(p, legend=None, ymin=3000, ymax=5500):
-    fig = plt.figure(constrained_layout=True, figsize=(6,10))
-    axes_names = [name.replace(' ','-') for name in p.uwis]
-    ax_dict = fig.subplot_mosaic([axes_names])
-    for i, w in enumerate(p):
-        name = w.uwi.replace(' ','-')
-        w.data['tops'].plot(ax=ax_dict[w.uwi.replace(' ','-')], legend=legend, alpha=0.5)
-        plot_tops(ax_dict[name], w.data['tops'], field='formation', ymin=ymin, ymax=ymax)
-        ax_dict[name].plot(w.data['GR']/120, w.data['GR'].basis, c='k', lw=0.5)
-        ax_dict[name].set_xlim(0,175/120)
-        ax_dict[name].set_ylim(ymax, ymin)
-        ax_dict[name].set_title(name)
-        if i != 0:
-            ax_dict[name].set_yticklabels([])
+def section_plot(p, legend, ymin=3000, ymax=5500, sorted_well_list=None):
+    
+    if sorted_well_list:
+        print('SORTED WELL LIST:', sorted_well_list)
+        print('LENGTH OF P before sorting', len(p))
+        p = sort_project(p, sorted_well_list)
+        for w in p:
+            print(w.uwi)
+        print('LENGTH or SORTED PROJ', len(p))
 
-    fig.savefig('cross_section.png')
+    print("NUMBER OF AXES: ", len(p))
+    if len(p) == 1:
+        fig, ax = plt.subplots(ncols=1, figsize=(len(p)*2.5, 12))
+        ax =  plot_well(ax, p[0], legend=legend, depth_ticks=False)
+    else:
+        fig, axs  = plt.subplots(ncols=len(p), figsize=(len(p)*1.0, 10))
+        for i, w in enumerate(p):
+            print(i, w.uwi)
+            if i == 0:
+                axs[i] = plot_well(axs[i], w, legend=legend, depth_ticks=True)
+            else:
+                axs[i] = plot_well(axs[i], w, legend=legend)
+    plt.tight_layout()
+    return fig
+
+
+def setup_ax(ax, depth=False, major=100, minor=25):
+    """Set up common parameters for the Axes in the example."""
+    # only show the bottom spine
+    ax.yaxis.set_major_locator(ticker.NullLocator())
+    ax.spines.right.set_color('none')
+    ax.spines.left.set_color('grey')
+    ax.spines.top.set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.tick_params(which='major', width=1.00, length=5)
+    ax.tick_params(which='minor', width=0.75, length=2.5)
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(major))
+    ax.yaxis.set_minor_locator(ticker.MultipleLocator(minor))
+    ax.patch.set_alpha(0.0)
+    ax.tick_params(axis='y', labelsize=5)
+    ax.set_ylim(ymax, ymin)
     return 
 
 
-def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs):
-    """
-    Plotting, but only for tops (as opposed to intervals).
-    """
-    if field is None:
-        print('You must provide a field to plot.')
-        # raise StriplogError('You must provide a field to plot.')
-
-    ys = [iv.top.z for iv in striplog]
-
-    try:
-        try:
-            ts = [getattr(iv.primary, field) for iv in striplog]
-        except:
-            ts = [iv.data.get(field) for iv in striplog]
-    except:
-        print('Could not find field')
-        #raise StriplogError('Could not retrieve field.')
-
-    for y, t in zip(ys, ts):
-        if (y > ymin) and (y < ymax):
-            ax.axhline(y, color='lightblue', lw=3, zorder=0)
-            ax.text(0.1, y,#-max(ys)/200, 
-                    t, fontsize=6, ha='left', va='center', bbox=dict(facecolor='white', 
-                                                         edgecolor='grey', 
-                                                         boxstyle='round',
-                                                         alpha=0.75))
-    return
+def plot_well(ax, w, legend, depth_ticks=False, ymin=3000, ymax=5500):
+    ax.set_title(w.header.uwi, fontsize=7, loc='center', fontweight='bold', 
+                rotation=rot_title(w.header.uwi))
+    plot_tops(ax, w.data['tops'], field='formation', ymin=ymin, ymax=ymax)
+    w.data['tops'].plot(ax=ax, legend=legend, alpha=0.5)
+    ax.plot(w.data['GR'] / 120, w.data['GR'].basis, c='k', lw=0.5)
+    ax.set_xlim(0, 175 / 120)
+    if depth_ticks == False:
+        ax.set_yticklabels([])
+    setup_ax(ax)
+    return ax
 
 
 def get_first_curve(curve_list):
@@ -125,17 +148,54 @@ def get_first_curve(curve_list):
     return curve
 
 
-def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
+def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs):
     """
-    This take a DataFram (df) for a well, and converts it into
-    as csv-like string to make a Striplog
-    """ 
-    header = 'top, Comp formation\n'
-    csv_txt = ''
-    csv_txt += csv_txt + header
-    for i, row in df.iterrows():
-        csv_txt = csv_txt + str(row['MD']) + ', ' + row['PICK'] + '\n'
-    return csv_txt
+    Plotting, but only for tops (as opposed to intervals).
+    """
+    if field is None:
+        raise StriplogError('You must provide a field to plot.')
+
+    ys = [iv.top.z for iv in striplog]
+
+    try:
+        try:
+            ts = [getattr(iv.primary, field) for iv in striplog]
+        except:
+            ts = [iv.data.get(field) for iv in striplog]
+    except:
+        print('Could not find field')
+        # raise StriplogError('Could not retrieve field.')
+
+    for y, t in zip(ys, ts):
+        if (y > ymin) and (y < ymax):
+            ax.axhline(y, color='dimgrey', lw=2, zorder=0)
+            ax.text(0.1, y, t, 
+                    fontsize=5, color=(0.2,0.2,0.2,1), ha='left', va='center', 
+                    bbox=dict(facecolor='white',
+                              edgecolor='None', #edgecolor='lightgrey',
+                              boxstyle='round, pad=0.1',
+                              alpha=0.85))
+    return
+
+
+def rot_title(title, max_title_len=10):
+    if len(title) > max_title_len:
+        rotate = 90
+    else:
+        rotate = 0
+    return rotate
+
+
+def encode_xsection(p, legend, savefig=False):
+    """
+    Takes the project and saves a xsec PNG a disk and encodes it for dash
+    """
+    fig = section_plot(p, legend)
+    image_filename = 'cross_section.png' # replace with your own image 
+    if savefig:
+        fig.savefig(image_filename)
+    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+    return 'data:image/png;base64,{}'.format(encoded_image.decode())
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -152,7 +212,7 @@ lasfiles = glob(path + '*.LAS')
 path2 = 'data/Poseidon_data/tops/' # direct link to specific data
 stripfiles = glob(path2 + '*.csv')
 
-tops_legend = Legend.from_csv(filename='data/Poseidon_data/tops_legend.csv') # direct link to specific data
+legend = Legend.from_csv(filename='data/Poseidon_data/tops_legend.csv') # direct link to specific data
 
 p = Project.from_las('data/Poseidon_data/las/*.LAS') # direct link to specific data
 well_uwi = [w.uwi for w in p] ##gets the well uwi data for use in the well-selector tool
@@ -166,29 +226,9 @@ for w in p:
     w.data['tops'] = strip
 
 
-# Make the well correlation panel
-def encode_xsection(p):
-    """
-    Takes the project and saves a xsec PNG a disk and encodes it for dash
-    """
-    section_plot(p, tops_legend)
-    image_filename = 'cross_section.png' # replace with your own image 
-    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
-    return 'data:image/png;base64,{}'.format(encoded_image.decode())
-
-
-# Initialize Cross-section
-# section_plot(p) # , tops_legend)
-# image_filename = 'cross_section.png' # replace with your own image 
-# encoded_image = base64.b64encode(open(image_filename, 'rb').read())
-
-#df = p[0].df() #gets a dataframe from the first well to pass to the figure
 well = p[0]  ##gets data from the first well in the Welly Project
 curve_list = get_curves(p) ##gets the column names for later use in the curve-selector tool
 curve = get_first_curve(curve_list)
-## Load well top data
-#surface_picks_df = pd.read_table(Path('./data/McMurray_data/PICKS.TXT'),
-#                                usecols=['UWI', 'PICK', 'MD'])
 surface_picks_df = get_tops_df(p)
 
 #well dropdown selector
@@ -201,7 +241,7 @@ curve_dropdown_options = [{'label': k, 'value': k} for k in sorted(curve_list)] 
 
 # draw the initial plot
 #plotting only GR and RD in a subplot
-ymin = 3000 # make dynamic later
+ymin, ymax = 3000, 5500 # make dynamic later
 fig_well_1 = helper.make_log_plot(w=well, ymin=ymin)
 
 app.title = "SwellCorr"
@@ -290,10 +330,11 @@ app.layout = dbc.Container(
                                     html.Hr(),
                                     # html.H4('Striplog CSV Text:'),
                                     # html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
-                                    html.Img(id='cross-section', src=encode_xsection(p), style={'display': 'block',
-                                                                                                'margin-left': 'auto',
-                                                                                                'margin-right': 'auto',
-                                                                                                }),
+                                    html.Img(id='cross-section', src=encode_xsection(p, legend),
+                                             style={'display': 'block',
+                                                    'margin-left': 'auto',
+                                                    'margin-right': 'auto',
+                                                    }),
                                     html.Div(id='placeholder', style={'display': 'none'}),
                                 ], width=7)
                         ]),
