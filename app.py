@@ -393,7 +393,7 @@ def update_figure(picks, curve, active_well):
     
     # regenerate figure with the new horizontal line
     fig = helper.make_log_plot(w=w, ymin=ymin)
-
+    fig.update_layout(uirevision=active_well)
     helper.update_picks_on_plot(fig, picks_selected)
     
     return fig
