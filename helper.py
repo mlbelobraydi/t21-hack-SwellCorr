@@ -57,7 +57,7 @@ def make_log_plot(w, log_list=['GR','DT'],
         hovermode="y",
         template='plotly_white'
         )
-    fig = go.Figure(data=data, layout=layout)
+    fig = go.Figure(data=data, layout=layout, layout_title_text=w.name)
     fig.update_yaxes(range=(ymax,ymin)) # reversed for MD assumption
     fig.layout.xaxis.fixedrange = True
 

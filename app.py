@@ -7,6 +7,7 @@ from dash import Dash, callback_context # dash is used to update the plot and fi
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 
 import flask
@@ -136,7 +137,7 @@ def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
     return csv_txt
 
 
-app = Dash(__name__)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # Create server variable with Flask server object for use with gunicorn
 server = app.server
 
@@ -203,84 +204,104 @@ ymin = 3000 # make dynamic later
 fig_well_1 = helper.make_log_plot(w=well, ymin=ymin)
 
 app.title = "SwellCorr"
-app.layout = html.Div(children=[
-    html.Div(
+
+controls = dbc.Card(
         children=[
-            html.H4('SwellCorr well correlation')
-        ]
-    ),
-    html.Div(
-        children=[
-            html.Div([
-                'Select well:', ##Well selector
-                dcc.Dropdown(id='well-selector', options=well_dropdown_options, value=p[0].uwi, style={'width': '200px'}),
-
-                'Edit tops:', ##existing top to edit selector
-                dcc.Dropdown(id='top-selector', options=tops_dropdown_options, placeholder="Select a top to edit", style={'width': '200px'}),
-                
-                html.Hr(),
-                'Create a new surface pick:', html.Br(), ##dialog to creat a new well top correlation for a well
-                dcc.Input(id='new-top-name', placeholder='Name for new top', type='text', value=''),
-                html.Button('Create', id='new-top-button'),
-                
-                html.Hr(),
-                'Curve Select:', html.Br(), ##well log curve selector
-                dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value=curve, placeholder="Select a curve", style={'width': '200px'}),
-                
-                html.Hr(),
-                "Write tops to file:", ##input box and button for outputting well correlation results to file
-                dcc.Input(id='input-save-path', type='text', placeholder='path_to_save_picks.json', value=''),
-                html.Button('Save Tops', id='save-button', n_clicks=0),
-
-                html.Hr(), ##button to update the Striplog dict on the page
-                html.Button('Update Striplog', id='gen-striplog-button'),
-                html.H4('Striplog CSV Text:'),
-                html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap', 'color': 'lightgray'})
-
-            ]),
-
-            dcc.Graph(id="well_plot", 
-                        figure=fig_well_1,
-                        style={'width': '75', 'height':'1200px'}), ##figure of log curve with well tops
-
-            html.Div([  
-
-                dash_table.DataTable(
-                    id='table',
-                    columns=[
-                        {"name": i, "id": i, "deletable": False, "selectable": False, "hideable": False}
-                        for i in surface_picks_df.columns
-                    ],
-                    data=surface_picks_df.to_dict('records'),
-                    editable=True,
-                    sort_action='native',
-                    sort_mode='multi',
-                    filter_action='native',
-                    style_table={'overflowY': 'scroll', 'height': 300},
+       
+            dbc.FormGroup(
+                [
+                    dbc.Label("Select Well"),
+                    dcc.Dropdown(id='well-selector', 
+                                options=well_dropdown_options,
+                                value=p[0].uwi,
                     ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Select a Pick to Edit"),
+                    dcc.Dropdown(id='top-selector', 
+                                 options=tops_dropdown_options, 
+                                 placeholder="Select a top to edit")
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label('Create a New Pick'),
+                    dbc.Input(id='new-top-name', placeholder='Name for new top', type='text', value=''),
+                    html.Button('Create', id='new-top-button', className='btn-primary')
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label('Select A Curve'),
+                    dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value=curve, placeholder="Select a curve"),
 
-                html.Hr(),               
-                #html.Img(id='corr-plot', src='data:image/png;base64,{}'.format(encoded_image)) #src='cross-section.png')
-                html.Img(id='cross-section', src=encode_xsection(p)), #src='cross-section.png')
-                
-
-                # hidden_div for storing tops data as json
-                # Currently not hidden for debugging purposes. change style={'display': 'none'}
-                html.Div(id='tops-storage', children=surface_picks_df.to_json(), style={'display': 'none'})
-          
-           ] , style={'width': 800}),
-            
-            # hidden_div for storing un-needed output
-            html.Div(id='placeholder', style={'display': 'none'}),
-            
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Write tops to file"),
+                    dbc.Input(id='input-save-path', type='text', placeholder='path_to_save_picks.json', value=''),
+                    html.Button('Save Tops', id='save-button', n_clicks=0, className='btn-primary')
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    html.Button('Update Striplog', id='gen-striplog-button', className='btn-primary')
+                ]
+            )
         ],
-        style={'display': 'flex',}
-    ),
-    html.Div(
-        html.P(children=['The swell way of correlating wells'])
-    )
-    ]
-)
+        body=True
+        )
+
+
+         
+app.layout = dbc.Container(
+                children=[
+                    html.H1('🌊 SwellCorr Well Correlation 🌊'),
+                    html.Hr(),
+                    dbc.Row(
+                        [
+                            dbc.Col(controls, width=2),
+                            dbc.Col(dcc.Graph(id="well_plot", 
+                                              figure=fig_well_1,
+                            style={'height': 1200}),
+                                    width=3),
+                            dbc.Col([
+                                dash_table.DataTable(
+                                        id='table',
+                                        columns=[
+                                            {"name": i, "id": i, "deletable": False, "selectable": False, "hideable": False}
+                                            for i in surface_picks_df.columns
+                                        ],
+                                        data=surface_picks_df.to_dict('records'),
+                                        editable=True,
+                                        sort_action='native',
+                                        sort_mode='multi',
+                                        filter_action='native',
+                                        style_table={'overflowY': 'scroll', 'height': '300px', 'width': '90%'},
+                                        ),
+
+                                    # hidden_div for storing tops data as json
+                                    html.Div(id='tops-storage', children=surface_picks_df.to_json(), style={'display': 'none'}),
+
+                                    html.Hr(),
+                                    # html.H4('Striplog CSV Text:'),
+                                    # html.Pre(id='striplog-txt', children='', style={'white-space': 'pre-wrap'}),            
+                                    html.Img(id='cross-section', src=encode_xsection(p), style={'display': 'block',
+                                                                                                'margin-left': 'auto',
+                                                                                                'margin-right': 'auto',
+                                                                                                }),
+                                    html.Div(id='placeholder', style={'display': 'none'}),
+                                ], width=7)
+                        ]),
+                    html.Hr(), 
+                    html.P(children=['The swell way of correlating wells 🌊'])
+                    ], 
+                fluid=True
+            )
+
 
 @app.callback(
     Output('cross-section', 'src'),
@@ -409,17 +430,17 @@ def save_picks(n_clicks, surface_picks, path):
 
     return
 
-# create striplog csv text
-@app.callback(
-    Output('striplog-txt', 'children'),
-    [Input('gen-striplog-button', 'n_clicks'),
-    Input('well-selector', 'value')],
-    [State('tops-storage', 'children')])
-def generate_striplog(n_clicks, active_well, surface_picks):
-    surface_picks = pd.read_json(surface_picks)
-    surface_picks = surface_picks[surface_picks['UWI'] == active_well]   
-    s = helper.surface_pick_to_striplog(surface_picks)
-    return json.dumps(s)
+# # create striplog csv text
+# @app.callback(
+#     Output('striplog-txt', 'children'),
+#     [Input('gen-striplog-button', 'n_clicks'),
+#     Input('well-selector', 'value')],
+#     [State('tops-storage', 'children')])
+# def generate_striplog(n_clicks, active_well, surface_picks):
+#     surface_picks = pd.read_json(surface_picks)
+#     surface_picks = surface_picks[surface_picks['UWI'] == active_well]   
+#     s = helper.surface_pick_to_striplog(surface_picks)
+#     return json.dumps(s)
 
 if __name__ == "__main__":
     app.run_server(port=4545, debug=True)
