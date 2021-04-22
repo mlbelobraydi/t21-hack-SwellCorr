@@ -207,6 +207,7 @@ app.title = "SwellCorr"
 
 controls = dbc.Card(
         children=[
+       
             dbc.FormGroup(
                 [
                     dbc.Label("Select Well"),
