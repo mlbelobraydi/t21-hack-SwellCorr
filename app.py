@@ -442,4 +442,4 @@ def save_picks(n_clicks, surface_picks, path):
 #     return json.dumps(s)
 
 if __name__ == "__main__":
-    app.run_server(port=4546, debug=True)
+    app.run_server(port=4545, debug=True)
