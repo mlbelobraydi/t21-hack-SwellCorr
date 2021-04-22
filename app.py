@@ -260,7 +260,7 @@ controls = dbc.Card(
          
 app.layout = dbc.Container(
                 children=[
-                    html.H1('🌊 SwellCorr Well Correlation 🌊'),
+                    html.H1('🌊 SwellCorr well correlation 🌊'),
                     html.Hr(),
                     dbc.Row(
                         [
