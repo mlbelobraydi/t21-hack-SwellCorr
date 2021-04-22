@@ -92,7 +92,8 @@ def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs)
     Plotting, but only for tops (as opposed to intervals).
     """
     if field is None:
-        raise StriplogError('You must provide a field to plot.')
+        print('You must provide a field to plot.')
+        # raise StriplogError('You must provide a field to plot.')
 
     ys = [iv.top.z for iv in striplog]
 
