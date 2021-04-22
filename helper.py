@@ -19,12 +19,11 @@ def make_log_plot(w, log_list=['GR','DT'],
     w_ymin = w.data[log_list[0]].basis[0]
     w_ymax = w.data[log_list[0]].basis[-1]
 
-    w.Curve.to_basis
     
     if ymin is None:
-        ymin = well_ymin
+        ymin = w_ymin
     if ymax is None:
-        ymax = well_ymax
+        ymax = w_ymax
     
 
 
