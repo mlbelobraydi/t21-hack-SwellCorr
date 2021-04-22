@@ -276,7 +276,7 @@ controls = dbc.Card(
             dbc.FormGroup(
                 [
                     dbc.Label('Select A Curve'),
-                    dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value='', placeholder="Select a curve"),
+                    dcc.Dropdown(id='curve-selector', options=curve_dropdown_options, value=curve, placeholder="Select a curve"),
 
                 ]
             ),
@@ -322,13 +322,10 @@ app.layout = dbc.Container(
                                         sort_mode='multi',
                                         filter_action='native',
                                         style_table={'overflowY': 'scroll', 'height': '300px', 'width': '90%'},
-                                        style_cell={'width': '{}%'.format(len(surface_picks_df.columns))},
                                         ),
 
                                     # hidden_div for storing tops data as json
-                                    html.Div(id='tops-storage', children=surface_picks_df.to_json(), 
-                                        style={'display': 'none'}
-                                        ),
+                                    html.Div(id='tops-storage', children=surface_picks_df.to_json(), style={'display': 'none'}),
 
                                     html.Hr(),
                                     # html.H4('Striplog CSV Text:'),
@@ -346,19 +343,7 @@ app.layout = dbc.Container(
                     ], 
                 fluid=True
             )
-#write a callback to update the data table from the json in hidden div
-@app.callback(
-    Output('table', 'data'),
-    [Input('tops-storage', 'children')]
-    )
-def update_data_table(surface_picks):
-    '''
-    TO DO
-    need to find a way to take edits from the data table and write back to json
-    so that this can also be a way to edit the tops
-    '''
-    surface_picks = pd.read_json(surface_picks).sort_values(['UWI','MD'], ascending = (True, True))
-    return surface_picks.to_dict('records')
+
 
 @app.callback(
     Output('cross-section', 'src'),
