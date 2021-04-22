@@ -449,7 +449,7 @@ def update_figure(picks, curve, active_well):
     picks_selected = picks_df[picks_df['UWI'] == active_well.replace(' ', '-')]
     
     # regenerate figure with the new horizontal line
-    fig = helper.make_log_plot(w=w, ymin=ymin)
+    fig = helper.make_log_plot(w=w, ymin=ymin, resample=0.1)
     fig.update_layout(uirevision=active_well)
     helper.update_picks_on_plot(fig, picks_selected)
     

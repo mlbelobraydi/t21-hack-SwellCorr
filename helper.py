@@ -14,18 +14,19 @@ def make_log_plot(w, log_list=['GR','DT'],
     - colors should be dynamic
     - linear vs. log should be dynamic
     '''
-    #resample @ None # resample curves to higher resolution
     
     w_ymin = w.data[log_list[0]].basis[0]
     w_ymax = w.data[log_list[0]].basis[-1]
-
     
     if ymin is None: ymin = w_ymin
     if ymax is None: ymax = w_ymax
-    
-    resample_step = 0.05 #static value for reasonable 
-    for log in log_list:
-        w.data[log] = w.data[log].to_basis(step=resample_step)
+    if resample:         
+        for log in log_list:
+            try:
+                w.data[log] = w.data[log].to_basis(step=resample)
+            except:
+                print('Resampling did not occur: ', resample, ' keeping original step.')
+
 
     track1 = go.Scatter(x=w.data[log_list[0]].values, y=w.data[log_list[0]].basis, name=log_list[0], line=dict(color='black'))
     track2 = go.Scatter(x=w.data[log_list[1]].values, y=w.data[log_list[1]].basis, name=log_list[1], line=dict(color='red'),
