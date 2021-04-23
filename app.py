@@ -341,7 +341,12 @@ app.layout = dbc.Container(
                                     html.Div(id='placeholder', style={'display': 'none'}),
                                 ], width=7)
                         ]),
-                    html.Hr(), 
+                    html.Hr(),
+                    html.A(
+                           [html.Img(id='logo', src='https://images.squarespace-cdn.com/content/v1/58a4b31dbebafb6777c575b4/1552228857222-IT0RG669ZUOLLLR597EU/ke17ZwdGBToddI8pDm48kLPswmMOqQZ9-Q6KHLjvbpZ7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UcaEU9usEQgaPMYSSHCLDdjcUDfwtSR5qjoqJbWx-aCIZDqXZYzu2fuaodM4POSZ4w/swung_round_no_text.png?format=500w',
+                                  style={'padding-left' : 100, 'height' : '10%', 'width' : '10%'})],
+                            href='https://softwareunderground.org/',
+                            target='_blank'),
                     html.P(children=['The swell way of correlating wells 🌊'])
                     ], 
                 fluid=True
@@ -449,7 +454,7 @@ def update_figure(picks, curve, active_well):
     picks_selected = picks_df[picks_df['UWI'] == active_well.replace(' ', '-')]
     
     # regenerate figure with the new horizontal line
-    fig = helper.make_log_plot(w=w, ymin=ymin, resample=0.1)
+    fig = helper.make_log_plot(w=w, ymin=ymin)# , resample=0.1) # resample needs a float to change basis
     fig.update_layout(uirevision=active_well)
     helper.update_picks_on_plot(fig, picks_selected)
     
