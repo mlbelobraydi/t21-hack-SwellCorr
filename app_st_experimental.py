@@ -33,7 +33,6 @@ def update_figure(picks, curve, active_well):
     fig.layout.xaxis.fixedrange = True
     fig.layout.template = 'plotly_white'
     helper.update_picks_on_plot(fig, picks_selected)
-
     return fig
 
 base_dir = "./data/Poseidon_data"
