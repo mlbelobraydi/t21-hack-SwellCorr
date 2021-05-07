@@ -1,94 +1,17 @@
 import streamlit as st
-from welly import Project
+from welly import Well, Project
 from pathlib import Path
 import plotly.express as px
 import matplotlib.pyplot as plt
-from striplog import Striplog
+from striplog import Striplog, Legend
 import helper
 from bokeh.models import ColumnDataSource, CustomJS
 from bokeh.plotting import figure
 import pandas as pd
 from streamlit_bokeh_events import streamlit_bokeh_events
-
+import xsection as xs
 
 st.set_page_config(layout='wide')
-
-
-def get_tops_df(project, tops_field='tops', columns=['UWI', 'PICK', 'MD']):
-    """
-    Returns a DataFrame of tops from a welly Project
-    """
-    tops_set = []
-    rows = []
-    for well in project:
-        for t in well.data[tops_field]:
-            row = [well.uwi, t.components[0]['formation'], t.top.middle]
-            tops_set.append(t.components[0]['formation'])
-            rows.append(row)
-    df = pd.DataFrame(rows, columns=columns)
-    return df
-
-
-def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
-    """
-    This take a DataFram (df) for a well, and converts it into
-    as csv-like string to make a Striplog
-    """
-    header = 'top, Comp formation\n'
-    csv_txt = ''
-    csv_txt += csv_txt + header
-    for i, row in df.iterrows():
-        csv_txt = csv_txt + str(row['MD']) + ', ' + row['PICK'] + '\n'
-    return csv_txt
-
-
-def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs):
-    """
-    Plotting, but only for tops (as opposed to intervals).
-    """
-    if field is None:
-        raise StriplogError('You must provide a field to plot.')
-
-    ys = [iv.top.z for iv in striplog]
-
-    try:
-        try:
-            ts = [getattr(iv.primary, field) for iv in striplog]
-        except:
-            ts = [iv.data.get(field) for iv in striplog]
-    except:
-        print('Could not find field')
-        # raise StriplogError('Could not retrieve field.')
-
-    for y, t in zip(ys, ts):
-        if (y > ymin) and (y < ymax):
-            ax.axhline(y, color='lightblue', lw=3, zorder=0)
-            ax.text(0.1, y,  # -max(ys)/200,
-                    t, fontsize=10, ha='left', va='center', bbox=dict(facecolor='white',
-                                                                      edgecolor='grey',
-                                                                      boxstyle='round',
-                                                                      alpha=0.75))
-    return
-
-
-def section_plot(p, legend=None, ymin=3000, ymax=5500):
-    fig = plt.figure(constrained_layout=True, figsize=(6, 10))
-    axes_names = [name.replace(' ', '-') for name in p.uwis]
-    ax_dict = fig.subplot_mosaic([axes_names])
-    for i, w in enumerate(p):
-        print("plotting", w)
-        name = w.uwi.replace(' ', '-')
-        w.data['tops'].plot(ax=ax_dict[w.uwi.replace(' ', '-')], legend=legend, alpha=0.5)
-        plot_tops(ax_dict[name], w.data['tops'], field='formation', ymin=ymin, ymax=ymax)
-        ax_dict[name].plot(w.data['GR'] / 120, w.data['GR'].basis, c='k', lw=0.5)
-        ax_dict[name].set_xlim(0, 175 / 120)
-        ax_dict[name].set_ylim(ymax, ymin)
-        ax_dict[name].set_title(name)
-        if i != 0:
-            ax_dict[name].set_yticklabels([])
-
-    #fig.savefig('cross_section.png')
-    return fig
 
 
 def update_figure(picks, curve, active_well):
@@ -120,6 +43,7 @@ base_dir = "./data/Poseidon_data"
 fpath = Path(base_dir+"/las/*.LAS")
 p = Project.from_las(str(fpath))
 well_uwi = [w.uwi for w in p]
+legend = Legend.from_csv(filename='data/Poseidon_data/tops_legend.csv') # direct link to specific data
 
 for w in p:
     name = Path(w.fname).stem
@@ -141,15 +65,15 @@ fig_well_1.update_yaxes(autorange="reversed") ## flips the y-axis to increase do
 fig_well_1.layout.xaxis.fixedrange = True ##forces the x axis to a fixed range based on the curve data
 fig_well_1.layout.template = 'plotly_white' ##template for the plotly figure
 
-surface_picks_df = get_tops_df(p)
+surface_picks_df = xs.get_tops_df(p)
 
 tops_storage = surface_picks_df.to_json()
 wells_tops = pd.read_json(tops_storage)
 well_tops = wells_tops[wells_tops.UWI == well_uwi]
-csv_txt = df_to_csvtxt(well_tops)
+csv_txt = xs.df_to_csvtxt(well_tops)
 p.get_well(well_uwi).data['tops'] = Striplog.from_csv(text=csv_txt)
 
-fig = section_plot(p)
+fig = xs.section_plot(p, legend)
 
 col1, col2 = st.beta_columns((1, 2))
 
