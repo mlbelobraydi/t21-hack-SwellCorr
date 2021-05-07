@@ -3,7 +3,6 @@ from striplog import Legend, Striplog
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import ticker
-import plotly.express as px # plotly is used as the main display functionality
 from dash import Dash, callback_context # dash is used to update the plot and fields dynamically in a web browser
 import dash_core_components as dcc
 import dash_html_components as html
