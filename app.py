@@ -4,39 +4,31 @@ import matplotlib.pyplot as plt
 from matplotlib import ticker
 import plotly.express as px # plotly is used as the main display functionality
 import matplotlib.pyplot as plt 
-
 from dash import Dash, callback_context # dash is used to update the plot and fields dynamically in a web browser
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-
 import flask
 from glob import glob
-
 import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
 import base64
 import os
-
 import helper
-
 import xsection as xs
-
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # Create server variable with Flask server object for use with gunicorn
 server = app.server
 
-
 # Get las files
 path = 'data/Poseidon_data/las/' # direct link to specific data
 lasfiles = glob(path + '*.LAS')
-
 
 # Get striplog files
 path2 = 'data/Poseidon_data/tops/' # direct link to specific data
