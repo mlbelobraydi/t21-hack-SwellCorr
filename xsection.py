@@ -6,17 +6,6 @@ from welly import Well, Project # Welly is used to organize the well data and pr
 from striplog import Legend, Striplog
 import base64
 
-def get_curves(p):
-    """
-    Gets a list of curves from the wells in the project
-    """
-    curve_list = []
-    for well in p:
-        curves = well.data.keys()
-        for c in curves:
-            curve_list.append(c)
-    return sorted(set(curve_list))
-
 
 def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
     """
@@ -29,6 +18,38 @@ def df_to_csvtxt(df, out_fields = ['top', 'Comp formation']):
     for i, row in df.iterrows():
         csv_txt = csv_txt + str(row['MD']) + ', ' + row['PICK'] + '\n'
     return csv_txt
+
+
+def encode_xsection(p, legend, savefig=True):
+    """
+    Takes the project and saves a xsec PNG a disk and encodes it for dash
+    """
+    fig = section_plot(p, legend)
+    image_filename = 'cross_section.png' # replace with your own image 
+    if savefig:
+        fig.savefig(image_filename)
+    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+    return 'data:image/png;base64,{}'.format(encoded_image.decode())
+
+
+def get_curves(p):
+    """
+    Gets a list of curves from the wells in the project
+    """
+    curve_list = []
+    for well in p:
+        curves = well.data.keys()
+        for c in curves:
+            curve_list.append(c)
+    return sorted(set(curve_list))
+
+
+def get_first_curve(curve_list):
+    if 'GR' in curve_list:
+        curve = 'GR'
+    else:
+        curve = curve_list[0] ## gets the first curve name for the plotly figure
+    return curve
 
 
 def get_tops_df(project, tops_field='tops', columns=['UWI', 'PICK', 'MD']):
@@ -108,27 +129,6 @@ def setup_ax(ax, ymin, ymax, depth=False, major=100, minor=25):
     return 
 
 
-def plot_well(ax, w, legend, depth_ticks=False, ymin=3000, ymax=5500):
-    ax.set_title(w.header.uwi, fontsize=7, loc='center', fontweight='bold', 
-                rotation=rot_title(w.header.uwi))
-    plot_tops(ax, w.data['tops'], field='formation', ymin=ymin, ymax=ymax)
-    w.data['tops'].plot(ax=ax, legend=legend, alpha=0.5)
-    ax.plot(w.data['GR'] / 120, w.data['GR'].basis, c='k', lw=0.5)
-    ax.set_xlim(0, 175 / 120)
-    if depth_ticks == False:
-        ax.set_yticklabels([])
-    setup_ax(ax, ymin=ymin, ymax=ymax)
-    return ax
-
-
-def get_first_curve(curve_list):
-    if 'GR' in curve_list:
-        curve = 'GR'
-    else:
-        curve = curve_list[0] ## gets the first curve name for the plotly figure
-    return curve
-
-
 def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs):
     """
     Plotting, but only for tops (as opposed to intervals).
@@ -159,21 +159,22 @@ def plot_tops(ax, striplog, ymin=0, ymax=1e6, legend=None, field=None, **kwargs)
     return
 
 
+def plot_well(ax, w, legend, depth_ticks=False, ymin=3000, ymax=5500):
+    ax.set_title(w.header.uwi, fontsize=7, loc='center', fontweight='bold', 
+                rotation=rot_title(w.header.uwi))
+    plot_tops(ax, w.data['tops'], field='formation', ymin=ymin, ymax=ymax)
+    w.data['tops'].plot(ax=ax, legend=legend, alpha=0.5)
+    ax.plot(w.data['GR'] / 120, w.data['GR'].basis, c='k', lw=0.5)
+    ax.set_xlim(0, 175 / 120)
+    if depth_ticks == False:
+        ax.set_yticklabels([])
+    setup_ax(ax, ymin=ymin, ymax=ymax)
+    return ax
+
+
 def rot_title(title, max_title_len=10):
     if len(title) > max_title_len:
         rotate = 90
     else:
         rotate = 0
     return rotate
-
-
-def encode_xsection(p, legend, savefig=True):
-    """
-    Takes the project and saves a xsec PNG a disk and encodes it for dash
-    """
-    fig = section_plot(p, legend)
-    image_filename = 'cross_section.png' # replace with your own image 
-    if savefig:
-        fig.savefig(image_filename)
-    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
-    return 'data:image/png;base64,{}'.format(encoded_image.decode())
