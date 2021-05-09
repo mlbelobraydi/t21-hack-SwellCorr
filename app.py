@@ -298,9 +298,9 @@ controls = dbc.Card(
 
 
          
-app.layout = dbc.Container(
+tab1_content = dbc.Container(
                 children=[
-                    html.H1('🌊 SwellCorr well correlation 🌊'),
+                    
                     html.Hr(),
                     dbc.Row(
                         [
@@ -346,6 +346,237 @@ app.layout = dbc.Container(
                     ], 
                 fluid=True
             )
+
+loglist = [{'label':'Gamma ray', 'value':'GR'},
+        {'label':'Density', 'value':'DEN'}
+        ]
+colourlist = [{'label':'blue', 'value':'#0000FF'},
+        {'label':'red', 'value':'#FF0000'},
+        {'label':'green', 'value':'#00FF00'}
+        ]
+
+Trackcard1 = dbc.Card(
+        children=[
+       
+            dbc.FormGroup(
+                [
+                    
+                    dbc.Label("Log1"),
+                    dcc.Dropdown(id='log1-1', 
+                                options=curve_dropdown_options,
+                                placeholder="select a log",
+                    ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Properties"),
+                    dcc.Dropdown(id='colour_log1-1', 
+                                 options=tops_dropdown_options, 
+                                 placeholder="Select a colour"),
+                    dbc.Input(id="left_log1-1", placeholder="range left", type="number"),
+                    dbc.Input(id="right_log1-1", placeholder="range right", type="number"),
+                    dbc.RadioItems(
+                                options=[
+                                    {"label": "linear", "value": "linear"},
+                                    {"label": "log", "value": "log"},
+                                ],
+                                value="linear",
+                                id="scale_log1-1",
+                                inline=True,
+                            ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Log2"),
+                    dcc.Dropdown(id='log1-2', 
+                                options=curve_dropdown_options,
+                                placeholder="select a log",
+                    ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Properties"),
+                    dcc.Dropdown(id='colour_log1-2', 
+                                 options=tops_dropdown_options, 
+                                 placeholder="Select a colour"),
+                    dbc.Input(id="left_log1-2", placeholder="range left", type="number"),
+                    dbc.Input(id="right_log1-2", placeholder="range right", type="number"),
+                    dbc.RadioItems(
+                                options=[
+                                    {"label": "linear", "value": "linear"},
+                                    {"label": "log", "value": "log"},
+                                ],
+                                value="linear",
+                                id="scale_log1-2",
+                                inline=True,
+                            ),
+                ]
+            ),
+        ]
+)
+Trackcard2 = dbc.Card(
+        children=[
+       
+            dbc.FormGroup(
+                [
+                    
+                    dbc.Label("Log1"),
+                    dcc.Dropdown(id='log2-1', 
+                                options=curve_dropdown_options,
+                                placeholder="select a log",
+                    ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Properties"),
+                    dcc.Dropdown(id='colour_log2-1', 
+                                 options=tops_dropdown_options, 
+                                 placeholder="Select a colour"),
+                    dbc.Input(id="left_log2-1", placeholder="range left", type="number"),
+                    dbc.Input(id="right_log2-1", placeholder="range right", type="number"),
+                    dbc.RadioItems(
+                                options=[
+                                    {"label": "linear", "value": "linear"},
+                                    {"label": "log", "value": "log"},
+                                ],
+                                value="linear",
+                                id="scale_log2-1",
+                                inline=True,
+                            ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Log2"),
+                    dcc.Dropdown(id='log2-2', 
+                                options=curve_dropdown_options,
+                                placeholder="select a log",
+                    ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Properties"),
+                    dcc.Dropdown(id='colour_log2-2', 
+                                 options=tops_dropdown_options, 
+                                 placeholder="Select a colour"),
+                    dbc.Input(id="left_log2-2", placeholder="range left", type="number"),
+                    dbc.Input(id="right_log2-2", placeholder="range right", type="number"),
+                    dbc.RadioItems(
+                                options=[
+                                    {"label": "linear", "value": "linear"},
+                                    {"label": "log", "value": "log"},
+                                ],
+                                value="linear",
+                                id="scale_log2-2",
+                                inline=True,
+                            ),
+                ]
+            ),
+        ]
+)
+Trackcard3 = dbc.Card(
+        children=[
+       
+            dbc.FormGroup(
+                [
+                    
+                    dbc.Label("Log1"),
+                    dcc.Dropdown(id='log3-1', 
+                                options=curve_dropdown_options,
+                                placeholder="select a log",
+                    ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Properties"),
+                    dcc.Dropdown(id='colour_log3-1', 
+                                 options=tops_dropdown_options, 
+                                 placeholder="Select a colour"),
+                    dbc.Input(id="left_log3-1", placeholder="range left", type="number"),
+                    dbc.Input(id="right_log3-1", placeholder="range right", type="number"),
+                    dbc.RadioItems(
+                                options=[
+                                    {"label": "linear", "value": "linear"},
+                                    {"label": "log", "value": "log"},
+                                ],
+                                value="linear",
+                                id="scale_log3-1",
+                                inline=True,
+                            ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Log2"),
+                    dcc.Dropdown(id='log3-2', 
+                                options=curve_dropdown_options,
+                                placeholder="select a log",
+                    ),
+                ]
+            ),
+            dbc.FormGroup(
+                [
+                    dbc.Label("Properties"),
+                    dcc.Dropdown(id='colour_log3-2', 
+                                 options=tops_dropdown_options, 
+                                 placeholder="Select a colour"),
+                    dbc.Input(id="left_log3-2", placeholder="range left", type="number"),
+                    dbc.Input(id="right_log3-2", placeholder="range right", type="number"),
+                    dbc.RadioItems(
+                                options=[
+                                    {"label": "linear", "value": "linear"},
+                                    {"label": "log", "value": "log"},
+                                ],
+                                value="linear",
+                                id="scale_log3-2",
+                                inline=True,
+                            ),
+                ]
+            ),
+        ]
+)
+template_dict = {'log1-1': 'log1-1',
+                'colour_log1-1': 'colour_log1-1',
+                'left_log1-1': 'left_log1-1',
+                'right_log1-1': 'right_log1-1',
+                'scale_log1-1': 'scale_log1-1',
+                }
+
+
+tab2_content = dbc.Container(
+                children=[
+                    
+                    html.Hr(),
+                    dbc.Row(
+                        [dbc.Col(Trackcard1, width=3),
+                        dbc.Col(Trackcard2, width=3),
+                        dbc.Col(Trackcard3, width=3)
+
+                        ]
+                    )
+                ]
+)
+
+
+app.layout = html.Div(
+                [
+                    html.H1('🌊 SwellCorr well correlation 🌊'),
+                    dbc.Tabs(
+    [
+        dbc.Tab(tab1_content, label="Well log Correlation"),
+        
+        dbc.Tab(
+            tab2_content, label="Well log template",
+        ),
+    ]
+)])
+
 #write a callback to update the data table from the json in hidden div
 @app.callback(
     Output('table', 'data'),

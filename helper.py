@@ -4,7 +4,7 @@ import plotly.graph_objs as go
 from welly import Well,Curve
 
 
-def make_log_plot(w, log_list=['GR','DT'], 
+def make_log_plot(w, log_list=['GR','DT', 'TNPH', 'RHOB'], 
                   ymin=None, ymax=None, 
                   resample=None): # curve names need to be dynamic later
     '''
@@ -28,15 +28,97 @@ def make_log_plot(w, log_list=['GR','DT'],
                 print('Resampling did not occur: ', resample, ' keeping original step.')
 
 
-    track1 = go.Scatter(x=w.data[log_list[0]].values, y=w.data[log_list[0]].basis, name=log_list[0], line=dict(color='black'))
-    track2 = go.Scatter(x=w.data[log_list[1]].values, y=w.data[log_list[1]].basis, name=log_list[1], line=dict(color='red'),
+    #track1 = go.Scatter(x=w.data[log_list[0]].values, y=w.data[log_list[0]].basis, name=log_list[0], line=dict(color='black'))
+    try:
+        track1 = go.Scatter(x=w.data[log_list[0]].values, y=w.data[log_list[0]].basis, name=log_list[0], line=dict(color='black'),
+                        xaxis='x1')
+    except:
+        track1 = go.Scatter(x=[], y=[], name="Empty", xaxis='x1')
+    try:
+        track2 = go.Scatter(x=w.data[log_list[1]].values, y=w.data[log_list[1]].basis, name=log_list[1], line=dict(color='red'),
                         xaxis='x2')
+    except:
+        track2 = go.Scatter(x=[], y=[], name="Empty", xaxis='x2')
 
-    data = [track1, track2]
+    try:
+        track3 = go.Scatter(x=w.data[log_list[2]].values, y=w.data[log_list[2]].basis, name=log_list[2], line=dict(color='red'),
+                        xaxis='x3')
+    except:
+        track3 = go.Scatter(x=[], y=[], name="Empty", xaxis='x3')
 
+    try:
+        track4 = go.Scatter(x=w.data[log_list[3]].values, y=w.data[log_list[3]].basis, name=log_list[3], line=dict(color='black'),
+                        xaxis='x4')
+    except:
+        track4 = go.Scatter(x=[], y=[], name="Empty", xaxis='x4')
+
+    data = [track1, track2, track3, track4]
+
+    figcross = go.Figure()
+
+    figcross.add_trace(track3)
+    figcross.add_trace(track4)
+
+    figcross.update_layout(
+    xaxis3=dict(
+        
+        
+        tickfont=dict(
+            color="#1f77b4"
+        ),
+        
+    ),
+    xaxis4=dict(
+        
+        
+        tickfont=dict(
+            color="#ff7f0e"
+        ),
+        
+        overlaying="x3",
+        
+        #type="log", 
+        #autorange='reversed',
+        #range=[3,-1]
+    ),
+    yaxis=dict(
+        domain=[0, 0.7],
+        
+        tickfont=dict(
+            color="#1f77b4"
+        )
+    )
+    )
+
+
+
+    fig = make_subplots(cols=3, 
+                        shared_yaxes=True,
+                        horizontal_spacing=0.01,
+                        subplot_titles=[log_list[0], log_list[1], log_list[2]],
+                        specs=[[{}, {}, {}]],
+                        figure = figcross)
+    
+    fig.add_traces([track1, track2],
+                rows=[1,1],
+                cols=[1,2]
+    )
+    fig.update_xaxes(row=1, col=1, range=[0,150], fixedrange=True, position=0)
+    fig.update_xaxes(row=1, col=2, autorange='reversed', fixedrange=True, position=1)
+    fig.update_xaxes(row=1, col=3, fixedrange=True)
+    
+    fig.update_yaxes(nticks=25, autorange='reversed')
+    fig.update_layout(hovermode="y", template="plotly_white")
+
+
+
+    return fig
+
+
+"""
     layout = go.Layout(
         xaxis=dict(
-            domain=[0, 0.45], #to keep some gap between tracks. try padding the margins instead
+            domain=[0, 0.3], #to keep some gap between tracks. try padding the margins instead
             range=[0,150], # need to be range values later
             #type='linear', # change to variable later
             position=1,
@@ -47,26 +129,40 @@ def make_log_plot(w, log_list=['GR','DT'],
             color="black") #change to variable later
             ),
         xaxis2=dict(
-            domain=[0.55, 1],
+            domain=[0.3, 0.6],
             range=[140,40],
             type='linear', # change to variable later
             position=1,
             title=log_list[1] 
+            ),
+        xaxis3=dict(
+            domain=[0.6, 1],
+            range=[0,3],
+            type='log', # change to variable later
+            position=1,
+            title=log_list[2] 
+            ),
+        xaxis4=dict(
+            domain=[0.6, 1],
+            range=[0,2],
+            type='log', # change to variable later
+            position=0.85,
+            title=log_list[3],
+            
             ),
         yaxis=dict(
             domain=[0,0.95] #controlling the top of the plot so the name and scale are visible
             ),
         hovermode="y",
         template='plotly_white',
-        
         )
+
     fig = go.Figure(data=data, layout=layout, layout_title_text=w.name)
     fig.update_yaxes(range=(ymax,ymin)) # reversed for MD assumption
     fig.layout.xaxis.fixedrange = True
     fig.layout.xaxis2.fixedrange = True #added this line also to control zoom on the second track
-   
-
-    return fig
+"""
+    
 
 
 def update_picks_on_plot(fig, surface_picks):
